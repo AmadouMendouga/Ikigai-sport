@@ -4,7 +4,7 @@ import { createHash, randomInt, randomUUID } from "node:crypto";
 import { verifyCustomerSession } from "@/lib/auth/dal";
 import { adminDb } from "@/lib/firebase/admin";
 import { getOrderById } from "@/lib/data/orders";
-import { campayCollect, campayGetTransaction, campayTransactionMismatch } from "@/lib/campay";
+import { CampayCollectError, campayCollect, campayGetTransaction, campayTransactionMismatch } from "@/lib/campay";
 import { applyPaymentResult } from "@/lib/paymentHelpers";
 import { decrementQuotedStock, loadInventoryQuote } from "@/lib/orderInventory";
 import { validateOrderItems } from "@/lib/orderValidation";
@@ -19,7 +19,7 @@ export interface InitiateCampayPaymentInput {
 
 export type InitiateCampayPaymentResult =
   | { ok: true; orderId: string; ussdCode: string; operator: string }
-  | { ok: false; error: string };
+  | { ok: false; error: string; retrySafe?: boolean };
 
 class PaymentInputError extends Error {}
 
@@ -50,6 +50,7 @@ export async function initiateCampayPaymentAction(
   type Decision =
     | { kind: "collect"; total: number; reference: string }
     | { kind: "existing"; ussdCode: string; operator: string }
+    | { kind: "pending" }
     | { kind: "busy" };
 
   let decision: Decision;
@@ -62,9 +63,20 @@ export async function initiateCampayPaymentAction(
         if (existing.campayReference && existing.ussdCode) {
           return { kind: "existing", ussdCode: existing.ussdCode, operator: existing.paymentOperator || "Mobile Money" };
         }
+        if (existing.paymentStatus === "pending" && !existing.paymentInitiationStartedAt) {
+          return { kind: "pending" };
+        }
         const startedAt = existing.paymentInitiationStartedAt ? new Date(existing.paymentInitiationStartedAt).getTime() : Date.now();
         if (Date.now() - startedAt < INITIATION_LOCK_MS) return { kind: "busy" };
-        throw new PaymentInputError("Cette tentative n'a pas pu être initialisée. Recommencez le paiement.");
+        // Une requête CamPay peut avoir atteint le fournisseur sans que la réponse
+        // soit revenue jusqu'à nous. On ne déclenche donc jamais un second collect
+        // automatiquement avec la même réservation : le webhook reste la source
+        // de réconciliation de cette tentative.
+        tx.update(orderRef, {
+          paymentInitiationStartedAt: null,
+          paymentFailureReason: "Vérification de la première tentative de paiement en cours. Ne payez pas une seconde fois.",
+        });
+        return { kind: "pending" };
       }
 
       const inventory = await loadInventoryQuote(tx, validated.items);
@@ -116,6 +128,9 @@ export async function initiateCampayPaymentAction(
   if (decision.kind === "existing") {
     return { ok: true, orderId: orderRef.id, ussdCode: decision.ussdCode, operator: decision.operator };
   }
+  if (decision.kind === "pending") {
+    return { ok: true, orderId: orderRef.id, ussdCode: "", operator: "Mobile Money" };
+  }
   if (decision.kind === "busy") return { ok: false, error: "Initialisation du paiement déjà en cours." };
 
   let result;
@@ -128,8 +143,19 @@ export async function initiateCampayPaymentAction(
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Échec de l'initialisation du paiement.";
-    await applyPaymentResult(orderRef.id, "FAILED", message);
-    return { ok: false, error: message };
+    if (err instanceof CampayCollectError && err.outcome === "rejected") {
+      await applyPaymentResult(orderRef.id, "FAILED", message);
+      return { ok: false, error: message, retrySafe: true };
+    }
+
+    // Résultat ambigu (timeout, réseau, réponse tronquée) : CamPay a peut-être
+    // déjà déclenché le débit. On garde donc la réservation et la même clé
+    // d'idempotence, puis on laisse le webhook réconcilier cette tentative.
+    await orderRef.update({
+      paymentInitiationStartedAt: null,
+      paymentFailureReason: message,
+    }).catch(() => {});
+    return { ok: true, orderId: orderRef.id, ussdCode: "", operator: "Mobile Money" };
   }
 
   // Le paiement a bien été initié chez le fournisseur. Une panne Firestore à
@@ -141,6 +167,7 @@ export async function initiateCampayPaymentAction(
       ussdCode: result.ussd_code,
       paymentOperator: result.operator,
       paymentInitiationStartedAt: null,
+      paymentFailureReason: null,
     });
   } catch {
     // Conservation volontaire de l'état pending/reserved, réconcilié par webhook.
