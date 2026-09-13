@@ -9,7 +9,7 @@
     "lint": "eslint",
     "seed:firestore": "node scripts/seed-firestore.mjs",
     "create:admin": "node scripts/create-admin.mjs",
-    "test": "node --experimental-strip-types --test tests/lib.test.mjs tests/critical-actions.test.mjs",
+    "test": "node --experimental-strip-types --test tests/lib.test.mjs tests/critical-actions.test.mjs tests/campay-retry.test.mjs",
     "test:rules": "firebase emulators:exec --only firestore \"node --experimental-strip-types --test tests/firestore-rules.test.mjs\"",
     "test:browser": "npm run build && node tests/browser-audit.mjs",
     "check": "npm run lint && npm run test && npm run test:rules && npm run test:browser"
