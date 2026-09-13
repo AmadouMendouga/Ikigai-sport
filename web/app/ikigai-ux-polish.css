@@ -153,6 +153,20 @@
   margin: 0;
 }
 
+/* Le panneau de mesure du mega-menu est déjà absolu et invisible : l'envoyer
+   à -9999px polluait malgré tout le scrollWidth du document. Il reste
+   mesurable sur desktop sans déplacer la zone de scroll, et n'est pas utile
+   lorsque la navigation desktop est masquée. */
+.am-ghost {
+  left: 0;
+}
+
+@media (max-width: 1040px) {
+  .am-ghost {
+    display: none;
+  }
+}
+
 /* Mobile : navigation basse stable, contenu jamais caché dessous. */
 @media (max-width: 760px) {
   .ik-storefront {

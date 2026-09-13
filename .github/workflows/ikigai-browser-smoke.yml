@@ -1,0 +1,62 @@
+name: IKIGAI Browser Smoke
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "web/**"
+      - ".github/workflows/ikigai-browser-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: read
+
+jobs:
+  smoke-production:
+    name: Production browser smoke
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Les previews Vercel du projet web sont protégés par Vercel SSO.
+      # Le pré-merge est donc couvert par la CI complète + le build Vercel.
+      # Après fusion, ce job attend le déploiement web du commit puis audite
+      # le domaine public de production, sans secret de contournement.
+      - name: Wait for production web deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in $(seq 1 36); do
+            state=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status" \
+              --jq '[.statuses[] | select(.context == "Vercel – le-maillot-ideal-preview")][0].state // "pending"')
+            echo "Vercel production web status: ${state}"
+            if [ "${state}" = "success" ]; then
+              exit 0
+            fi
+            if [ "${state}" = "failure" ] || [ "${state}" = "error" ]; then
+              echo "Le déploiement Vercel web de master a échoué."
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "Le déploiement Vercel web n'a pas atteint success dans la fenêtre de contrôle."
+          exit 1
+
+      - name: Run public browser smoke
+        env:
+          LMI_AUDIT_BASE_URL: https://ikigai-sport.naragroup.cc.cd/
+        run: node tests/browser-smoke-remote.mjs
