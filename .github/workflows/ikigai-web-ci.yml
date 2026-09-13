@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   validate-web:
-    name: Lint, tests and typecheck
+    name: Lint, tests, rules and typecheck
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -29,6 +29,10 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
       - name: Install dependencies
         run: npm ci
       - name: Production dependency audit
@@ -37,12 +41,18 @@ jobs:
         run: npm run lint
       - name: Critical tests
         run: npm test
+      - name: Firestore security rules tests
+        run: npm run test:rules
       - name: Generate Next route types
         run: npx next typegen
       - name: TypeScript typecheck
         run: npx tsc --noEmit
 
       # PageProps/LayoutProps sont générés par Next.js via `next typegen`.
+      # Les Security Rules sont testées contre l'émulateur Firestore avec un
+      # projet demo-* isolé : aucune donnée ou ressource Firebase de production
+      # n'est utilisée par ce check. Java 21 est épinglé pour rester compatible
+      # avec les prochaines versions de l'émulateur Firestore.
       # L'audit bloque les vulnérabilités critiques réellement embarquées en
       # production. Deux alertes modérées transitives restent actuellement dans
       # gaxios -> uuid (GHSA-w5hq-g745-h8pq) avec Firebase Admin 14.4.0 ; les
@@ -53,5 +63,5 @@ jobs:
       # Firebase Admin et des données Firestore de l'environnement de déploiement.
       # On ne copie pas ces secrets de production dans GitHub Actions : Vercel
       # reste le check d'intégration qui exécute le vrai `next build` avec son
-      # propre environnement, tandis que cette CI valide sécurité prod, lint,
-      # logique métier et types.
+      # propre environnement, tandis que cette CI valide sécurité prod, règles,
+      # lint, logique métier et types.
