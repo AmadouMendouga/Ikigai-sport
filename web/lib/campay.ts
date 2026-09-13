@@ -23,9 +23,9 @@ export type CampayCollectOutcome = "rejected" | "unknown";
 
 /**
  * Un refus HTTP explicite est définitif et permet une nouvelle tentative.
- * Une panne réseau ou une réponse invalide est ambiguë : la requête a pu
- * atteindre CamPay. Dans ce cas on ne doit surtout pas libérer le stock ni
- * relancer immédiatement un second débit.
+ * Une panne réseau, un timeout, une erreur serveur ou une réponse invalide
+ * sont ambigus : la requête a pu atteindre CamPay. Dans ce cas on ne doit
+ * surtout pas libérer le stock ni relancer immédiatement un second débit.
  */
 export class CampayCollectError extends Error {
   constructor(message: string, readonly outcome: CampayCollectOutcome) {
@@ -45,6 +45,15 @@ export interface CampayCollectResult {
   reference: string;
   ussd_code: string;
   operator: string;
+}
+
+function collectOutcomeForHttpStatus(status: number): CampayCollectOutcome {
+  // 5xx : le fournisseur peut avoir effectué une partie du traitement avant
+  // de renvoyer l'erreur. 408/409/425 sont également ambigus pour un flux de
+  // paiement. La priorité est d'éviter un double débit, même si cela impose
+  // une réconciliation manuelle dans un cas rare.
+  if (status >= 500 || status === 408 || status === 409 || status === 425) return "unknown";
+  return "rejected";
 }
 
 /** Déclenche un prompt de paiement Mobile Money sur le téléphone du client. */
@@ -70,9 +79,15 @@ export async function campayCollect(input: CampayCollectInput): Promise<CampayCo
   }
 
   if (!res.ok) {
+    const outcome = collectOutcomeForHttpStatus(res.status);
     throw new CampayCollectError(
-      await readErrorMessage(res, "CamPay a refusé la demande de paiement."),
-      "rejected"
+      await readErrorMessage(
+        res,
+        outcome === "unknown"
+          ? "CamPay a renvoyé une réponse incertaine. Ne relancez pas immédiatement le paiement."
+          : "CamPay a refusé la demande de paiement."
+      ),
+      outcome
     );
   }
 
