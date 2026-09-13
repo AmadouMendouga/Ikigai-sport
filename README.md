@@ -1,6 +1,6 @@
 # Le Maillot Idéal
 
-[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/AmadouMendouga/Le-Maillot-Ideal?utm_source=badge)
+[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/AmadouMendouga/Ikigai-sport?utm_source=badge)
 
 Boutique de maillots de football au Cameroun. Le dépôt contient la boutique
 statique historique (HTML/CSS/JS + console d'administration) à la racine et la
@@ -28,6 +28,6 @@ Les benchmarks vivent dans [`bench/`](bench) et s'appuient sur
 | `bench/web-lib.bench.mjs` | Logique métier de l'application Next.js (`web/lib/`) : panier et message WhatsApp, validation des commandes côté serveur, nettoyage des traces GPS de livraison. |
 
 Chaque `push` sur `master` et chaque pull request exécute ces benchmarks sur
-[CodSpeed](https://app.codspeed.io/AmadouMendouga/Le-Maillot-Ideal) en mode
+[CodSpeed](https://app.codspeed.io/AmadouMendouga/Ikigai-sport) en mode
 simulation CPU, ce qui rend les mesures reproductibles malgré le bruit des
 machines d'intégration continue.
