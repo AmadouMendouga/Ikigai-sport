@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./admin.css";
+import "./admin-refonte-v2.css";
 
-// css/admin.css (copié ici) est la seule exception à la règle « un seul
-// fichier CSS » du site public (CLAUDE.md §12) : ces styles ne doivent pas
-// être livrés aux visiteurs, donc importés uniquement sous /admin.
+// Les styles de l'administration restent chargés uniquement sous /admin afin
+// de ne pas alourdir le storefront public. La couche V2 est additive et ne
+// touche pas aux actions métier, aux commandes ou aux accès Firebase.
 export const metadata: Metadata = {
   title: "Administration | IKIGAI Sport",
   robots: { index: false, follow: false },
