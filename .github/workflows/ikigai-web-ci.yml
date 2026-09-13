@@ -1,0 +1,48 @@
+name: IKIGAI Web CI
+
+on:
+  pull_request:
+    paths:
+      - "web/**"
+      - ".github/workflows/ikigai-web-ci.yml"
+  push:
+    branches:
+      - master
+    paths:
+      - "web/**"
+      - ".github/workflows/ikigai-web-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-web:
+    name: Lint, tests and typecheck
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Critical tests
+        run: npm test
+      - name: Generate Next route types
+        run: npx next typegen
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      # PageProps/LayoutProps sont générés par Next.js via `next typegen`.
+      # Le build complet dépend volontairement des variables Firebase Admin et
+      # des données Firestore de l'environnement de déploiement. On ne copie
+      # pas ces secrets de production dans GitHub Actions : Vercel reste le
+      # check d'intégration qui exécute le vrai `next build` avec son propre
+      # environnement, tandis que cette CI valide lint, logique métier et types.

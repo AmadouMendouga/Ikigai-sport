@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./lmi.css";
 import "./ikigai-ui.css";
+import "./ikigai-ux-polish.css";
 import { IconSprite } from "@/components/icons/IconSprite";
 import { ToastHost } from "@/components/Toast";
 

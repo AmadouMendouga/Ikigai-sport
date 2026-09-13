@@ -17,15 +17,17 @@ const LIVE_CHECK_AFTER_POLLS = 30; // ~90s
 export function PaymentStatusPoller({
   orderId,
   initialStatus,
+  initialReason,
   ussdCode,
 }: {
   orderId: string;
   initialStatus: PaymentStatus;
+  initialReason: string | null;
   ussdCode: string | null;
 }) {
   const { sport } = useParams<{ sport: string }>();
   const [status, setStatus] = useState<PaymentStatus>(initialStatus);
-  const [reason, setReason] = useState<string | null>(null);
+  const [reason, setReason] = useState<string | null>(initialReason);
   const [checking, setChecking] = useState(false);
   const [canCheckManually, setCanCheckManually] = useState(false);
   const pollCountRef = useRef(0);
@@ -108,10 +110,20 @@ export function PaymentStatusPoller({
     );
   }
 
+  const uncertain = Boolean(reason) && !ussdCode;
+
   return (
     <div className="contact-card">
-      <h3>En attente de confirmation</h3>
-      {ussdCode ? (
+      <h3>{uncertain ? "Paiement en cours de vérification" : "En attente de confirmation"}</h3>
+      {uncertain ? (
+        <div className="payment-warning" role="status" aria-live="polite">
+          <Icon name="info" size="sm" />
+          <div>
+            <strong>Ne relancez pas le paiement.</strong>
+            <p>{reason}</p>
+          </div>
+        </div>
+      ) : ussdCode ? (
         <p>
           Composez <strong>{ussdCode}</strong> sur votre téléphone pour confirmer le paiement, ou
           validez le code PIN reçu par notification.
