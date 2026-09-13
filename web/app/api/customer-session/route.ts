@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { AuthError } from "@/lib/auth/dal";
+import { getCustomerProfile } from "@/lib/data/customer";
 
 // Miroir de app/api/session/route.ts (admin) pour les comptes clients — cookie
 // distinct (customer_session), pas de contrôle de custom claim : tout compte
@@ -11,11 +13,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "idToken manquant." }, { status: 400 });
   }
 
-  // Ne pas initialiser Firebase Admin au chargement du module : le GET public
-  // de cette route est appelé par le storefront même pour un visiteur anonyme.
-  // Un problème de configuration Admin ne doit donc jamais faire tomber les
-  // pages publiques avant même qu'une authentification soit demandée.
-  let admin;
+  // Firebase Admin n'est chargé que pour les opérations qui en ont besoin.
+  // Le GET public reste donc utilisable par un visiteur anonyme sans initialiser
+  // le SDK tant que la DAL n'a détecté aucune session client à vérifier.
+  let admin: typeof import("@/lib/firebase/admin");
   try {
     admin = await import("@/lib/firebase/admin");
   } catch {
@@ -63,27 +64,11 @@ export async function DELETE() {
 /** The public header can personalize itself without exposing the session cookie. */
 export async function GET() {
   const headers = { "Cache-Control": "private, no-store", Vary: "Cookie" };
-  const cookieStore = await cookies();
-
-  // Cas le plus fréquent : visiteur anonyme. Répondre sans charger Firebase
-  // Admin évite qu'une dépendance/configuration serveur ne transforme un simple
-  // affichage public en erreur 500.
-  if (!cookieStore.get("customer_session")?.value) {
-    return Response.json({ profile: null }, { headers });
-  }
-
   try {
-    const { getCustomerProfile } = await import("@/lib/data/customer");
     const profile = await getCustomerProfile();
     return Response.json({ profile: { name: profile.name } }, { headers });
   } catch (error) {
-    try {
-      const { AuthError } = await import("@/lib/auth/dal");
-      if (error instanceof AuthError) return Response.json({ profile: null }, { headers });
-    } catch {
-      // Si Firebase Admin lui-même ne peut pas s'initialiser, le 503 ci-dessous
-      // rend l'incident observable sans exposer les détails de configuration.
-    }
+    if (error instanceof AuthError) return Response.json({ profile: null }, { headers });
     return Response.json({ profile: null }, { status: 503, headers });
   }
 }
