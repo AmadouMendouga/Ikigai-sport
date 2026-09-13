@@ -6,7 +6,7 @@
 // l'original (?league=, ?promo=1, ?stock=1, ?tri=, ?q=), lus une seule fois
 // au montage. Les interactions restent locales afin de ne pas toucher aux
 // flux métier, au panier ou aux API.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/icons/Icon";
 import { ProductCard } from "@/components/products/ProductCard";
 import { stockInfo } from "@/lib/cart";
@@ -34,6 +34,7 @@ export function Shop({
   const [searchInput, setSearchInput] = useState("");
   const [sort, setSort] = useState<SortOrder>("default");
   const [page, setPage] = useState(1);
+  const filtersPanelRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -51,6 +52,25 @@ export function Shop({
     if (tri === "prix-asc") setSort("price-asc");
     else if (tri === "prix-desc") setSort("price-desc");
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 901px)");
+    const sync = (event?: MediaQueryListEvent) => {
+      const panel = filtersPanelRef.current;
+      if (!panel) return;
+      if (event ? event.matches : desktop.matches) {
+        panel.open = true;
+      } else {
+        // En mobile, les filtres commencent repliés afin de laisser les
+        // produits visibles immédiatement. L'utilisateur garde ensuite le
+        // contrôle du panneau tant que le breakpoint ne change pas.
+        panel.removeAttribute("open");
+      }
+    };
+    sync();
+    desktop.addEventListener("change", sync);
+    return () => desktop.removeEventListener("change", sync);
   }, []);
 
   const filtered = useMemo(() => {
@@ -101,7 +121,7 @@ export function Shop({
   return (
     <div className="shop-layout">
       <aside id="catalogFilters" className="filters" aria-label="Filtres du catalogue">
-        <details className="filters-panel" open>
+        <details ref={filtersPanelRef} className="filters-panel">
           <summary>
             <span className="filters-summary-label">
               <Icon name="tune" size="sm" />

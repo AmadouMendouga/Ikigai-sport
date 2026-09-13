@@ -7,6 +7,7 @@ import "./ikigai-refonte-v2-components.css";
 import "./ikigai-rareui-polish.css";
 import { IconSprite } from "@/components/icons/IconSprite";
 import { ToastHost } from "@/components/Toast";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "IKIGAI Sport",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <IconSprite />
         {children}
         <ToastHost />
+        <Analytics />
       </body>
     </html>
   );
