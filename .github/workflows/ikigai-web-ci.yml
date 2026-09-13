@@ -31,6 +31,8 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - name: Install dependencies
         run: npm ci
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=critical
       - name: Lint
         run: npm run lint
       - name: Critical tests
@@ -41,8 +43,12 @@ jobs:
         run: npx tsc --noEmit
 
       # PageProps/LayoutProps sont générés par Next.js via `next typegen`.
+      # L'audit bloque uniquement sur une vulnérabilité critique affectant les
+      # dépendances réellement embarquées en production ; les outils dev sont
+      # exclus pour éviter de confondre risque de build et risque utilisateur.
       # Le build complet dépend volontairement des variables Firebase Admin et
       # des données Firestore de l'environnement de déploiement. On ne copie
       # pas ces secrets de production dans GitHub Actions : Vercel reste le
       # check d'intégration qui exécute le vrai `next build` avec son propre
-      # environnement, tandis que cette CI valide lint, logique métier et types.
+      # environnement, tandis que cette CI valide sécurité prod, lint, logique
+      # métier et types.
