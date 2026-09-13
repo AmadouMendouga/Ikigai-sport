@@ -44,11 +44,12 @@ jobs:
 
       # PageProps/LayoutProps sont générés par Next.js via `next typegen`.
       # L'audit bloque uniquement sur une vulnérabilité critique affectant les
-      # dépendances réellement embarquées en production ; les outils dev sont
-      # exclus pour éviter de confondre risque de build et risque utilisateur.
-      # Le build complet dépend volontairement des variables Firebase Admin et
-      # des données Firestore de l'environnement de déploiement. On ne copie
-      # pas ces secrets de production dans GitHub Actions : Vercel reste le
-      # check d'intégration qui exécute le vrai `next build` avec son propre
-      # environnement, tandis que cette CI valide sécurité prod, lint, logique
-      # métier et types.
+      # dépendances réellement embarquées en production ; il protège notamment
+      # la pile cartographique MapLibre utilisée par le suivi de livraison.
+      # Les outils dev sont exclus pour éviter de confondre risque de build et
+      # risque utilisateur. Le build complet dépend volontairement des variables
+      # Firebase Admin et des données Firestore de l'environnement de déploiement.
+      # On ne copie pas ces secrets de production dans GitHub Actions : Vercel
+      # reste le check d'intégration qui exécute le vrai `next build` avec son
+      # propre environnement, tandis que cette CI valide sécurité prod, lint,
+      # logique métier et types.
