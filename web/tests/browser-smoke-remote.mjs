@@ -43,26 +43,53 @@ async function auditPage(browser, route, viewport, label) {
   const page = await context.newPage();
   const errors = [];
   const external = [];
+  const serverErrors = [];
   page.on("console", (message) => message.type() === "error" && errors.push(message.text()));
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("request", (request) => !allowedRequest(request.url()) && external.push(request.url()));
+  page.on("response", (response) => {
+    if (response.status() >= 500) serverErrors.push(`${response.status()} ${response.url()}`);
+  });
 
   try {
     const response = await page.goto(urlFor(route), { waitUntil: "domcontentloaded", timeout: 30000 });
     await settle(page);
     check(response?.status() === 200, `${label} /${route} ne répond pas en 200`);
+    check(
+      serverErrors.length === 0,
+      `${label} /${route} reçoit des réponses 5xx : ${[...new Set(serverErrors)].join(", ")}`
+    );
     check(errors.length === 0, `${label} /${route} produit des erreurs : ${errors.join(" | ")}`);
     check(external.length === 0, `${label} /${route} charge des domaines non autorisés : ${[...new Set(external)].join(", ")}`);
 
     const audit = await page.evaluate(() => ({
       h1Count: document.querySelectorAll("h1").length,
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      overflowing: [...document.querySelectorAll("*")]
+        .filter((el) => el.getClientRects().length > 0)
+        .map((el) => {
+          const rect = el.getBoundingClientRect();
+          return {
+            tag: el.tagName.toLowerCase(),
+            id: el.id || "",
+            className: typeof el.className === "string" ? el.className : "",
+            width: Math.round(rect.width),
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+          };
+        })
+        .filter((item) => item.right > window.innerWidth + 1 || item.left < -1)
+        .sort((a, b) => Math.max(b.right - window.innerWidth, -b.left) - Math.max(a.right - window.innerWidth, -a.left))
+        .slice(0, 16),
       brokenImages: [...document.images].filter(
         (img) => img.getClientRects().length > 0 && img.complete && img.naturalWidth === 0 && Boolean(img.src)
       ).length,
     }));
     check(audit.h1Count === 1, `${label} /${route} doit avoir exactement un h1 (trouvé ${audit.h1Count})`);
-    check(audit.overflow <= 0, `${label} /${route} déborde horizontalement de ${audit.overflow}px`);
+    check(
+      audit.overflow <= 0,
+      `${label} /${route} déborde horizontalement de ${audit.overflow}px ; éléments : ${JSON.stringify(audit.overflowing)}`
+    );
     check(audit.brokenImages === 0, `${label} /${route} contient ${audit.brokenImages} image(s) visible(s) cassée(s)`);
   } finally {
     await context.close();
