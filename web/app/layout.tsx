@@ -4,6 +4,7 @@ import "./ikigai-ui.css";
 import "./ikigai-ux-polish.css";
 import "./ikigai-refonte-v2.css";
 import "./ikigai-refonte-v2-components.css";
+import "./ikigai-rareui-polish.css";
 import { IconSprite } from "@/components/icons/IconSprite";
 import { ToastHost } from "@/components/Toast";
 
