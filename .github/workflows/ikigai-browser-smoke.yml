@@ -1,9 +1,9 @@
-name: IKIGAI Production Browser Smoke
+name: IKIGAI Browser Smoke
 
 on:
   pull_request:
     paths:
-      - "web/tests/browser-smoke-remote.mjs"
+      - "web/**"
       - ".github/workflows/ikigai-browser-smoke.yml"
   push:
     branches:
@@ -16,6 +16,8 @@ on:
 permissions:
   contents: read
   statuses: read
+  issues: read
+  pull-requests: read
 
 jobs:
   smoke-production:
@@ -24,8 +26,6 @@ jobs:
     defaults:
       run:
         working-directory: web
-    env:
-      LMI_AUDIT_BASE_URL: https://ikigai-sport.naragroup.cc.cd/
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,23 +38,51 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      # Sur master, attendre que Vercel ait réellement publié le projet web
-      # correspondant au commit avant d'auditer le domaine de production.
-      # Sur une PR, le smoke vérifie la production courante pour valider le
-      # mécanisme lui-même, sans prétendre tester le code non encore déployé.
-      - name: Wait for Vercel web deployment
-        if: github.event_name == 'push'
+      # Une PR doit auditer son propre déploiement Vercel `web/`, pas la
+      # production courante. Sur master, on attend au contraire la publication
+      # du commit puis on teste le domaine public définitif.
+      - name: Resolve deployed audit target
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            target_sha="${{ github.event.pull_request.head.sha }}"
+            for attempt in $(seq 1 36); do
+              state=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${target_sha}/status" \
+                --jq '[.statuses[] | select(.context == "Vercel – le-maillot-ideal-preview")][0].state // "pending"')
+              echo "Vercel PR web status: ${state}"
+              if [ "${state}" = "success" ]; then
+                body=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${{ github.event.pull_request.number }}/comments" \
+                  --jq '[.[] | select(.user.login == "vercel[bot]") | .body][-1] // ""')
+                preview=$(printf '%s\n' "${body}" \
+                  | grep -oE 'https://le-maillot-ideal-preview-[A-Za-z0-9.-]+\.vercel\.app' \
+                  | tail -1 || true)
+                if [ -n "${preview}" ]; then
+                  echo "LMI_AUDIT_BASE_URL=${preview}/" >> "${GITHUB_ENV}"
+                  echo "Audit preview: ${preview}"
+                  exit 0
+                fi
+              fi
+              if [ "${state}" = "failure" ] || [ "${state}" = "error" ]; then
+                echo "Le déploiement Vercel web de la PR a échoué."
+                exit 1
+              fi
+              sleep 10
+            done
+            echo "Le preview Vercel web de la PR est introuvable ou n'est pas prêt."
+            exit 1
+          fi
+
           for attempt in $(seq 1 36); do
             state=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status" \
               --jq '[.statuses[] | select(.context == "Vercel – le-maillot-ideal-preview")][0].state // "pending"')
-            echo "Vercel web status: ${state}"
+            echo "Vercel production web status: ${state}"
             if [ "${state}" = "success" ]; then
+              echo "LMI_AUDIT_BASE_URL=https://ikigai-sport.naragroup.cc.cd/" >> "${GITHUB_ENV}"
               exit 0
             fi
             if [ "${state}" = "failure" ] || [ "${state}" = "error" ]; then
+              echo "Le déploiement Vercel web de master a échoué."
               exit 1
             fi
             sleep 10
