@@ -1,176 +1,304 @@
 # NARA — Relance IA du projet IKIGAI Sport
 
-> Ce fichier est le point de reprise pour toute IA ou développeur qui reprend le travail. Ne pas recommencer l'analyse depuis zéro : lire ce document, inspecter la PR et continuer à partir de l'état réel du dépôt.
+> **ÉTAT : MIS DE CÔTÉ / PAUSE VOLONTAIRE.** La refonte en cours ne doit pas être fusionnée ou poursuivie automatiquement. Ce fichier sert de point de reprise pour un autre agent IA ou développeur. L'agent doit d'abord lire ce document, inspecter l'état réel de la branche/PR, lancer l'application, puis seulement modifier le code si l'utilisateur le lui demande.
 
-## Projet
+## Projet à reprendre
 
-- Repository : `AmadouMendouga/Le-Maillot-Ideal`
-- Application concernée : `web/`
-- Branche de refonte : `design/ikigai-utile-refonte`
+- Repository : `AmadouMendouga/Ikigai-sport`
+- Application concernée : **uniquement `web/`** sauf nécessité explicite.
+- Branche de travail mise de côté : `design/ikigai-utile-refonte`
 - Pull Request : `#16 — Refonte visuelle IKIGAI Sport à partir des références Utile`
 - Branche cible : `master`
-- Couleur principale IKIGAI : `#22C55E`
-- Référence UX/UI principale : lot `Utile(1)` fourni par le client (145 références visuelles analysées).
+- Couleur principale : `#22C55E`
+- Runtime : **Node.js 22.x**
+- Stack web : Next.js 16.3.3, React 19, Firebase/Firestore, Firebase Admin, CamPay, Cloudinary, Leaflet + MapLibre.
 
-## Mission
+## Consigne pour l'agent IA qui reprend
 
-Continuer la refonte UX/UI complète d'IKIGAI Sport en s'inspirant des principes du lot `Utile(1)`, sans copier servilement les interfaces. Le résultat doit être cohérent, premium, sportif, simple, moderne, très lisible et réellement utilisable sur mobile comme desktop.
+Ne recommence pas l'analyse depuis zéro et ne crée pas une nouvelle refonte parallèle. Commence par la branche `design/ikigai-utile-refonte`, compare-la à `master`, lis la PR #16 et conserve les garanties métier déjà présentes.
 
-La refonte doit couvrir : accueil/boutique, navigation/header, catégories/recherche/filtres, cartes produits, fiche produit, panier, checkout/paiement, connexion/inscription, Mes commandes, détail et suivi de commande, Mon compte, favoris, navigation mobile, interface livreur et administration.
+Avant toute écriture :
 
-## Direction visuelle validée
+1. lire `nara.md` ;
+2. lire `web/AGENTS.md` ;
+3. inspecter `web/package.json` ;
+4. inspecter la PR #16 et ses checks ;
+5. vérifier le diff avec `master` ;
+6. lancer l'application localement ;
+7. seulement ensuite proposer ou appliquer des changements.
 
-- Vert `#22C55E` = accent/action/état actif, pas une couleur à mettre partout.
-- Surfaces principalement blanches/neutres et contraste sombre propre.
-- Hiérarchie typographique forte.
-- Plus d'espace et moins de bruit visuel.
-- Ombres discrètes, pas de glow ni d'effets artificiels.
-- CTA très identifiables.
-- Cartes produit simples : image prioritaire, titre court, prix dominant.
-- Formulaires avec labels persistants et erreurs compréhensibles.
-- Cibles tactiles >= 44 px.
-- Bottom navigation mobile claire, 4/5 destinations visuellement prioritaires.
-- Responsive à vérifier au minimum à 320, 360, 390, 430, 768, 1024 et 1440 px.
-- Respecter `prefers-reduced-motion`.
+## Comment lancer le projet localement par un autre agent IA
 
-## Travail déjà réalisé dans la PR #16
+### 1. Récupérer la bonne branche
 
-Une première couche additive `web/app/ikigai-refonte-v2.css` a été créée et importée après les styles existants. Elle commence à harmoniser :
+```bash
+git clone https://github.com/AmadouMendouga/Ikigai-sport.git
+cd Ikigai-sport
+git fetch --all --prune
+git checkout design/ikigai-utile-refonte
+git pull --ff-only origin design/ikigai-utile-refonte
+```
 
-- header/recherche ;
-- hero ;
-- boutons ;
-- catégories/chips ;
-- catalogue et filtres ;
+Si le dépôt existe déjà :
+
+```bash
+cd Ikigai-sport
+git fetch origin
+git checkout design/ikigai-utile-refonte
+git pull --ff-only origin design/ikigai-utile-refonte
+```
+
+Ne travaille pas directement sur `master` pour reprendre cette refonte.
+
+### 2. Entrer dans l'application web
+
+```bash
+cd web
+```
+
+Toutes les commandes npm ci-dessous doivent être exécutées depuis `web/`.
+
+### 3. Vérifier les prérequis
+
+```bash
+node --version
+npm --version
+java -version
+```
+
+Attendu :
+
+- Node.js `22.x` ;
+- npm compatible avec Node 22 ;
+- Java 21 pour les tests des Firestore Security Rules.
+
+L'agent ne doit pas rétrograder Next.js ou Node pour contourner une erreur.
+
+### 4. Installer exactement les dépendances verrouillées
+
+```bash
+npm ci
+```
+
+Ne lancer `npm update` ou une mise à jour majeure de dépendances que pour une raison précise et validée.
+
+### 5. Configurer les variables d'environnement
+
+Le fichier de secrets ne doit **jamais** être inventé ni commité. Récupérer les valeurs existantes depuis l'environnement sécurisé du projet/Vercel ou auprès du propriétaire, puis créer localement :
+
+```text
+web/.env.local
+```
+
+Variables connues utilisées directement dans le code :
+
+```dotenv
+# Firebase navigateur
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+
+# Firebase Admin serveur
+FIREBASE_ADMIN_PROJECT_ID=
+FIREBASE_ADMIN_CLIENT_EMAIL=
+FIREBASE_ADMIN_PRIVATE_KEY=
+
+# CamPay
+CAMPAY_PERMANENT_ACCESS_TOKEN=
+CAMPAY_WEBHOOK_KEY=
+# Optionnel : sinon https://demo.campay.net est utilisé
+CAMPAY_BASE_URL=
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+Important pour `FIREBASE_ADMIN_PRIVATE_KEY` : le code accepte les `\n` échappés et les reconvertit en retours à la ligne. Ne modifier ce comportement que si la cause d'un problème a été prouvée.
+
+Il peut exister d'autres variables selon les routes/fonctions ajoutées après cette note. Avant un déploiement complet, l'agent doit rechercher les usages de `process.env` dans `web/` et comparer avec les variables réellement configurées sur Vercel. Ne jamais afficher les valeurs secrètes dans les logs, une PR ou une réponse utilisateur.
+
+### 6. Lancer en développement
+
+```bash
+npm run dev
+```
+
+Puis ouvrir :
+
+```text
+http://localhost:3000
+```
+
+Si le port 3000 est occupé, Next.js peut proposer un autre port. L'agent doit reprendre l'URL réellement affichée dans le terminal.
+
+### 7. Vérifications minimales après démarrage
+
+Tester au moins :
+
+- accueil ;
+- boutique ;
+- recherche et filtres ;
+- fiche produit ;
+- ajout panier ;
+- connexion/compte ;
+- Mes commandes ;
+- pages de livraison/tracking quand des données de test sont disponibles ;
+- `/admin` si l'agent dispose d'un compte admin de test.
+
+Contrôler aussi : console navigateur, erreurs réseau, 401/403 attendus, 5xx inattendus, images cassées et overflow horizontal.
+
+## Commandes de validation avant tout push important
+
+Reproduire le plus possible la CI GitHub :
+
+```bash
+npm audit --omit=dev --audit-level=critical
+npm run lint
+npm test
+npm run test:rules
+npx next typegen
+npx tsc --noEmit
+```
+
+Pour le build complet :
+
+```bash
+npm run build
+```
+
+Le build complet dépend des variables Firebase Admin et de l'environnement réel. Une erreur liée aux secrets manquants ne doit pas être "corrigée" en supprimant la sécurité ou en masquant l'exception.
+
+Le script global disponible est :
+
+```bash
+npm run check
+```
+
+Il lance lint + tests critiques + Security Rules + audit navigateur/build. Il peut nécessiter l'environnement complet.
+
+## Déploiement / Vercel
+
+Le dépôt est relié à Vercel. Au moment de la mise en pause, les déploiements Vercel de cette branche étaient bloqués par un `build-rate-limit` du workspace. Ce statut doit être revérifié au moment de la reprise : ne pas supposer qu'il est toujours présent.
+
+Il existe également un problème antérieur à surveiller : un smoke production a déjà détecté un HTTP 503 lié à Firebase Admin/Vercel. Si ce problème réapparaît :
+
+- comparer les variables Firebase Admin Preview vs Production ;
+- vérifier `FIREBASE_ADMIN_PROJECT_ID` ;
+- vérifier `FIREBASE_ADMIN_CLIENT_EMAIL` ;
+- vérifier `FIREBASE_ADMIN_PRIVATE_KEY` et ses retours à la ligne ;
+- ne jamais transformer un vrai 503 serveur en faux succès côté client.
+
+Le webhook CamPay ne peut pas être testé de bout en bout sur `localhost` car CamPay doit joindre une URL publique. Pour cette partie, utiliser une preview déployée et des identifiants/environnements de test appropriés.
+
+## Direction visuelle de la refonte mise en pause
+
+La PR #16 applique les références `Utile(1)` et une inspiration Rare UI utilisée avec parcimonie :
+
+- vert `#22C55E` pour accent/action/état actif, pas partout ;
+- surfaces neutres légèrement teintées ;
+- éviter noir/blanc purs quand ce n'est pas nécessaire ;
+- hiérarchie typographique forte ;
+- peu de graisses, uniquement celles réellement disponibles en IBM Plex Sans ;
+- cohérence des icônes ;
+- bordures discrètes, ombres minimales ;
+- pas de glow, blobs ou décor gratuit ;
+- produit/prix/statut/CTA prioritaires ;
+- labels persistants dans les formulaires ;
+- cibles tactiles >= 44 px ;
+- mobile-first ;
+- dark mode lisible ;
+- respect de `prefers-reduced-motion`.
+
+Fichiers de surcouche actuellement utilisés dans `web/app/` :
+
+- `ikigai-refonte-v2.css`
+- `ikigai-refonte-v2-components.css`
+- `ikigai-rareui-polish.css`
+- `ikigai-commerce-polish.css`
+- `ikigai-account-delivery-polish.css`
+
+Le layout global importe également Vercel Analytics : ne pas le perdre pendant un rebase/résolution de conflit.
+
+L'administration possède sa propre couche CSS sous `web/app/admin/` afin de ne pas charger les styles admin chez les visiteurs.
+
+## Travail déjà couvert avant la pause
+
+La refonte a déjà touché ou harmonisé :
+
+- header/navigation ;
+- boutique, recherche et filtres ;
 - cartes produit ;
 - fiche produit ;
-- formulaires/auth ;
-- commandes ;
 - panier ;
-- bottom navigation ;
-- responsive mobile/tablette/desktop.
+- premiers éléments compte/commandes ;
+- dark mode/contrastes ;
+- micro-interactions sobres inspirées de Rare UI ;
+- inscription livreur ;
+- bases d'harmonisation admin/mobile.
 
-Documentation ajoutée :
-- `docs/IKIGAI-REFONTE-V2.md`
-- `docs/IKIGAI-REFONTE-CHECKLIST.md`
+Ne considérer toutefois pas la refonte comme terminée tant qu'une vraie preview n'a pas été validée visuellement.
 
-Le fichier `web/app/layout.tsx` importe la nouvelle couche V2.
+## Règles métier à ne jamais casser pour "faire marcher" l'UI
 
-## Règle critique : ne pas casser la logique métier
-
-La refonte UI ne doit pas modifier ou contourner sans nécessité :
+Ne pas affaiblir ou contourner sans justification :
 
 - Firebase / Firebase Admin ;
-- Firestore et ses Security Rules ;
-- Auth ;
+- Firestore et Security Rules ;
+- Auth et ownership serveur ;
 - CamPay ;
-- logique d'idempotence et de réconciliation paiement ;
+- idempotence et réconciliation paiement ;
+- webhook CamPay ;
 - Cloudinary ;
-- stock/réservation de stock ;
-- ownership serveur des commandes ;
-- workflow de livraison ;
-- validation finale QR/code ;
+- stock et réservation ;
+- workflow réel de commande/livraison ;
+- QR/code final de remise ;
 - API protégées.
 
-Le paiement CamPay a déjà été sécurisé : une réponse réseau ambiguë ne doit jamais provoquer automatiquement un second prélèvement. Le webhook/réconciliation doit conserver son rôle.
+CamPay : une panne réseau, un timeout, un 5xx ou une réponse ambiguë peut correspondre à une demande déjà reçue par CamPay. **Ne jamais déclencher automatiquement un deuxième prélèvement** dans ce cas. Garder l'idempotence et laisser la réconciliation/webhook confirmer l'état.
 
-## Parcours commande/livraison à préserver
+Livraison : une commande ne passe pas directement à `Livrée`. Le suivi GPS s'active au bon moment, puis la remise finale est confirmée par le mécanisme QR/code côté serveur.
 
-- Une commande ne doit jamais devenir `Livrée` immédiatement après départ.
-- Le client doit voir la progression réelle de sa commande.
-- Le tracking devient accessible au bon moment du parcours.
-- L'itinéraire/livreur doit être exploitable sur la carte.
-- La livraison finale nécessite la confirmation prévue côté serveur (QR/code).
-- `Mes commandes` doit distinguer au minimum les commandes en cours, planifiées et l'historique.
+## Parcours livraison existant à préserver
 
-## Baseline technique déjà obtenue avant cette refonte
+Le projet contient déjà :
 
-Les PR précédentes ont notamment apporté :
+- `web/components/delivery/DeliveryMap.tsx` ;
+- `web/components/delivery/LocationSharingForm.tsx` ;
+- `web/components/delivery/CourierRegisterForm.tsx` ;
+- navigation MapLibre/Leaflet ;
+- itinéraire routier ;
+- positions client/livreur ;
+- interface livreur ;
+- confirmation arrivée ;
+- scan QR ou saisie du code ;
+- confirmation serveur de livraison.
 
-- optimisation du changement d'état admin ;
-- nouveau parcours `Mes commandes` ;
-- `Mon compte` ;
-- contrôles serveur d'ownership ;
-- accessibilité renforcée ;
-- sécurité des retries CamPay ;
-- MapLibre v6 ;
-- Firebase Admin 14 / Node 22 ;
-- tests Firestore Security Rules en CI ;
-- smoke Playwright post-déploiement ;
-- corrections d'overflow storefront/cart mobile.
+Ne remplacer ce système qu'après tests réels et preuve qu'une modification améliore le parcours sans régression.
 
-Ne pas supprimer ces acquis pendant la refonte.
+## Procédure de reprise de la refonte, si l'utilisateur la réactive
 
-## Blocage actuel — IMPORTANT
+1. Synchroniser la branche de PR #16.
+2. Vérifier qu'elle est toujours mergeable avec `master`.
+3. Inspecter les changements arrivés sur `master` pendant la pause.
+4. Résoudre les conflits en conservant les nouvelles fonctionnalités de `master` et la refonte.
+5. Obtenir une vraie preview Vercel si possible.
+6. Tester visuellement desktop + mobile.
+7. Corriger d'abord les régressions réelles, pas les préférences abstraites.
+8. Finir : commandes/compte → tracking/livreur → admin.
+9. Rejouer CI complète.
+10. Ne fusionner dans `master` qu'après validation suffisante.
+11. Après fusion, vérifier le vrai domaine et exécuter le smoke post-déploiement.
 
-Au 13 septembre 2026, la PR #16 est ouverte et mergeable, mais les deux checks Vercel échouent avec `build-rate-limit` :
+## Prompt prêt à donner à un autre agent IA
 
-- `Vercel – le-maillot-ideal-preview` : failure
-- `Vercel – le-maillot-ideal` : failure
+Copier/coller ceci à l'agent chargé de reprendre :
 
-La cible Vercel indique une limite de fréquence/quota de builds du workspace. Ce blocage n'est pas une preuve d'erreur du code de refonte.
+> Tu reprends le projet GitHub `AmadouMendouga/Ikigai-sport`. Commence par lire `nara.md` à la racine puis `web/AGENTS.md`. La partie active est `web/`. La refonte actuelle est mise de côté sur la branche `design/ikigai-utile-refonte` et la PR #16 ; ne la fusionne pas automatiquement. Checkout cette branche, installe avec Node 22 via `npm ci` depuis `web/`, récupère les variables d'environnement existantes de manière sécurisée, lance `npm run dev`, puis teste réellement l'application. Avant toute modification, compare avec `master` et vérifie les checks GitHub/Vercel. Préserve strictement Firebase/Firestore/Auth, CamPay et son idempotence, Cloudinary, le stock, les commandes, le tracking et la validation QR/code. Si l'utilisateur te demande de reprendre la refonte, continue dans la même branche et valide lint/tests/rules/types/build avant push/merge. Ne masque jamais une erreur serveur réelle par une correction UI.
 
-Il existe aussi un problème serveur antérieur à surveiller : le smoke production avait détecté un HTTP 503 lié à Firebase Admin/Vercel. Ne jamais masquer ce 503 par CSS ou en affaiblissant les tests. Vérifier la configuration Firebase Admin côté Vercel (project id, client email, private key et format des retours à la ligne, environnement Production/Preview).
+## Dernière règle
 
-## Procédure de reprise par une autre IA
-
-1. Checkout/synchroniser `design/ikigai-utile-refonte`.
-2. Lire la PR #16 et le diff avant toute modification.
-3. Vérifier les checks GitHub/Vercel.
-4. Si `build-rate-limit` est levé, récupérer immédiatement l'URL du preview de la PR #16.
-5. Tester réellement le preview avec navigateur/Playwright sur desktop + mobile.
-6. Contrôler console JS, erreurs réseau, 5xx, images cassées et overflow horizontal.
-7. Vérifier visuellement : accueil → boutique → filtres → produit → panier → auth → checkout → commandes → compte.
-8. Corriger les régressions dans la même branche de refonte.
-9. Continuer ensuite les composants structurels, écran par écran, au lieu d'empiler uniquement du CSS global.
-10. Tester les parcours métier après chaque changement structurel.
-11. Lancer TypeScript, ESLint, tests Node/business/CamPay, tests Firestore Rules et smoke Playwright disponibles dans le projet.
-12. Ne fusionner dans `master` qu'après preview visuellement validé et CI acceptable.
-13. Après fusion, vérifier le déploiement production et refaire le smoke sur le vrai domaine.
-
-## Ordre recommandé de la suite de la refonte
-
-1. Header + navigation desktop/mobile.
-2. Accueil et boutique/catalogue.
-3. Cartes produit + fiche produit.
-4. Panier.
-5. Authentification et profil incomplet.
-6. Checkout + états CamPay, sans toucher aux garanties de paiement.
-7. Mes commandes + détail + timeline + tracking.
-8. Mon compte + favoris + aide.
-9. Interface livreur + carte + arrivée + QR/code.
-10. Administration, en gardant les actions rapides déjà optimisées.
-11. Audit responsive/accessibilité complet.
-12. Smoke E2E et validation production.
-
-## Critères de validation visuelle
-
-Avant fusion, vérifier au minimum :
-
-- aucun overflow horizontal ;
-- aucun panneau/cart hors viewport ;
-- aucun texte important tronqué ;
-- images produit non déformées ;
-- prix/CTA/statuts immédiatement lisibles ;
-- focus clavier visible ;
-- boutons tactiles confortables ;
-- contrastes corrects clair/sombre ;
-- navigation mobile non superposée au contenu ;
-- panier utilisable à 320/360/390 px ;
-- commandes et timeline compréhensibles sans explication ;
-- aucune régression paiement/livraison/auth/API.
-
-## Consigne de communication
-
-Ne pas signaler du bruit de routine. Pour chaque problème actionnable, produire :
-
-1. ce qui a changé / ce qui casse ;
-2. pourquoi c'est important ;
-3. risque ou blocage ;
-4. prochaine action concrète.
-
-Si rien d'actionnable n'a changé : `Aucun changement actionnable depuis le dernier contrôle.`
-
-## Instruction finale pour l'IA qui reprend
-
-Tu as l'autorisation de continuer le travail technique sur la branche de refonte : analyser, modifier, tester et pousser les corrections nécessaires. Ne fusionne pas à l'aveugle. La priorité immédiate est de débloquer/attendre le preview Vercel, de le tester visuellement, puis de poursuivre la refonte écran par écran tout en préservant les garanties métier et de sécurité existantes.
+**Pause signifie pause.** Un autre agent peut lancer, inspecter, tester et diagnostiquer le projet en suivant ce fichier. Il ne doit reprendre les modifications de la refonte, fusionner la PR #16 ou déployer en production que lorsque l'utilisateur le demande explicitement ou que la mission confiée l'exige clairement.
