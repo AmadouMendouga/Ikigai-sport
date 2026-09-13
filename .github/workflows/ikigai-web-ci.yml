@@ -43,9 +43,11 @@ jobs:
         run: npx tsc --noEmit
 
       # PageProps/LayoutProps sont générés par Next.js via `next typegen`.
-      # L'audit bloque uniquement sur une vulnérabilité critique affectant les
-      # dépendances réellement embarquées en production ; il protège notamment
-      # la pile cartographique MapLibre utilisée par le suivi de livraison.
+      # L'audit bloque les vulnérabilités critiques réellement embarquées en
+      # production. Deux alertes modérées transitives restent actuellement dans
+      # gaxios -> uuid (GHSA-w5hq-g745-h8pq) avec Firebase Admin 14.4.0 ; les
+      # correctifs npm sans `--force` ne peuvent pas les supprimer. On garde donc
+      # le seuil critique plutôt que d'imposer une résolution transitive risquée.
       # Les outils dev sont exclus pour éviter de confondre risque de build et
       # risque utilisateur. Le build complet dépend volontairement des variables
       # Firebase Admin et des données Firestore de l'environnement de déploiement.
