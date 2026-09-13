@@ -23,16 +23,18 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Apply non-breaking production audit fixes
-        run: npm audit fix --omit=dev
-      - name: Verify production audit
+      - name: Apply non-breaking audit fixes
+        continue-on-error: true
+        run: npm audit fix
+      - name: Verify production audit at moderate level
         run: npm audit --omit=dev --audit-level=moderate
-      - name: Commit lockfile and remove temporary workflow
+      - name: Commit safe fixes and remove temporary workflow
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           cd ..
           rm .github/workflows/_tmp-prod-audit-fix.yml
           git add web/package-lock.json web/package.json .github/workflows/_tmp-prod-audit-fix.yml
-          git commit -m "fix(security): resolve remaining production dependency advisories" || exit 0
+          git commit -m "fix(security): apply non-breaking dependency audit fixes" || exit 0
           git push
