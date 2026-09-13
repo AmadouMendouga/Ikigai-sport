@@ -10,7 +10,7 @@
 // les deux, au prix d'un correctif de quelques millisecondes après affichage
 // si l'URL contenait des paramètres). Jamais réécrit dans l'URL ensuite —
 // comportement identique à l'original.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/icons/Icon";
 import { ProductCard } from "@/components/products/ProductCard";
 import { stockInfo } from "@/lib/cart";
@@ -42,6 +42,19 @@ export function Shop({
   const [searchInput, setSearchInput] = useState("");
   const [sort, setSort] = useState<SortOrder>("default");
   const [page, setPage] = useState(1);
+  const filtersRef = useRef<HTMLDetailsElement>(null);
+
+  // Replié par défaut sur mobile : ouvert en dur (`open`) pour que le panneau
+  // reste visible sans JS sur la colonne latérale desktop (`.filters`, fixe,
+  // pas de bouton pour le refermer — voir lmi.css §Boutique). Sur mobile il
+  // devient un <details> repliable (lmi.css, @media max-width: 940px) mais
+  // s'ouvrait quand même en grand par défaut, doublonnant la rangée de
+  // pastilles juste en dessous avant même d'arriver aux produits.
+  useEffect(() => {
+    if (filtersRef.current && window.matchMedia("(max-width: 940px)").matches) {
+      filtersRef.current.open = false;
+    }
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -93,7 +106,7 @@ export function Shop({
   return (
     <div className="shop-layout">
       <aside id="catalogFilters" className="filters" aria-label="Filtres du catalogue">
-        <details className="filters-panel" open>
+        <details ref={filtersRef} className="filters-panel" open>
           <summary>
             <Icon name="tune" size="sm" />
             Filtrer les produits
