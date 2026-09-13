@@ -726,9 +726,9 @@ html[data-theme="dark"] .auth-field input { background: var(--surface-container-
 .auth-field input:focus { outline: none; border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
 .auth-field input[aria-invalid="true"] { border-color: var(--error); box-shadow: inset 0 0 0 1px var(--error); }
 .auth-field input::placeholder { color: var(--on-surface-variant); font-weight: 400; }
-.auth-input.has-trail input { padding-right: 50px; }
+.auth-input.has-trail input { padding-right: 54px; }
 .auth-input .icon-trail {
-  position: absolute; right: 6px; width: 40px; height: 40px; display: grid; place-items: center;
+  position: absolute; right: 6px; width: 44px; height: 44px; display: grid; place-items: center;
   background: none; border: 0; color: var(--on-surface-variant); cursor: pointer; border-radius: 50%;
 }
 .auth-input .icon-trail:hover { background: var(--surface-container-high); }

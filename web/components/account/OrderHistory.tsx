@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useId, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/icons/Icon";
 import { FCFA } from "@/lib/cart";
@@ -10,6 +10,8 @@ import { usePrivatePolling } from "@/lib/hooks/usePrivatePolling";
 import { orderDate } from "@/components/account/OrderTimeline";
 
 export function OrderHistory({ orders, sport }: { orders: CustomerOrderView[]; sport: string }) {
+  const id = useId();
+  const panelId = `${id}-panel`;
   const [tab, setTab] = useState<OrderGroup>(orders.some((order) => customerOrderGroup(order) === "active") || !orders.length ? "active" : orders.some((order) => customerOrderGroup(order) === "scheduled") ? "scheduled" : "history");
   const { data, warning, refreshing, refresh } = usePrivatePolling("/api/customer/orders", orders, 20000);
   const groups = {
@@ -19,20 +21,24 @@ export function OrderHistory({ orders, sport }: { orders: CustomerOrderView[]; s
   };
   const tabs: OrderGroup[] = ["active", "scheduled", "history"];
   function handleTabKey(event: KeyboardEvent<HTMLButtonElement>, current: OrderGroup) {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    let next: OrderGroup;
+    if (event.key === "Home") next = tabs[0];
+    else if (event.key === "End") next = tabs[tabs.length - 1];
+    else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      const offset = event.key === "ArrowRight" ? 1 : -1;
+      next = tabs[(tabs.indexOf(current) + offset + tabs.length) % tabs.length];
+    } else return;
     event.preventDefault();
-    const offset = event.key === "ArrowRight" ? 1 : -1;
-    const next = tabs[(tabs.indexOf(current) + offset + tabs.length) % tabs.length];
     setTab(next);
-    requestAnimationFrame(() => document.getElementById(`orders-tab-${next}`)?.focus());
+    requestAnimationFrame(() => document.getElementById(`${id}-tab-${next}`)?.focus());
   }
   return <>
     <div className="ik-orders-toolbar"><div className="ik-order-tabs" role="tablist" aria-label="Filtrer mes commandes">
-      {([["active", "En cours"], ["scheduled", "Planifiées"], ["history", "Historique"]] as const).map(([key, label]) => <button type="button" role="tab" id={`orders-tab-${key}`} aria-selected={tab === key} aria-controls={`orders-panel-${key}`} tabIndex={tab === key ? 0 : -1} key={key} onClick={() => setTab(key)} onKeyDown={(event) => handleTabKey(event, key)}>{label}<span aria-label={`${groups[key].length} commande${groups[key].length > 1 ? "s" : ""}`}>{groups[key].length}</span></button>)}
+      {([["active", "En cours"], ["scheduled", "Planifiées"], ["history", "Historique"]] as const).map(([key, label]) => <button type="button" role="tab" id={`${id}-tab-${key}`} aria-selected={tab === key} aria-controls={panelId} tabIndex={tab === key ? 0 : -1} key={key} onClick={() => setTab(key)} onKeyDown={(event) => handleTabKey(event, key)}>{label}<span aria-label={`${groups[key].length} commande${groups[key].length > 1 ? "s" : ""}`}>{groups[key].length}</span></button>)}
     </div><button type="button" className="ik-round-button" aria-label="Actualiser mes commandes" disabled={refreshing} onClick={() => void refresh()}><Icon name="refresh" /></button></div>
     <p className="sr-only" role="status" aria-live="polite">{refreshing ? "Actualisation des commandes en cours" : ""}</p>
     {warning ? <p className="ik-inline-warning" role="status">{warning}</p> : null}
-    <div className="ik-order-list" role="tabpanel" id={`orders-panel-${tab}`} aria-labelledby={`orders-tab-${tab}`}>
+    <div className="ik-order-list" role="tabpanel" id={panelId} aria-labelledby={`${id}-tab-${tab}`} tabIndex={0}>
       {groups[tab].map((order) => <article key={order.id} className="ik-order-card">
         <div className="ik-order-card-head"><span className="ik-order-parcel" aria-hidden="true"><Icon name="inventory" /></span>
           <div><strong>IKIGAI Sport</strong><p><time dateTime={order.createdAt}>{orderDate(order.createdAt)}</time> · #{order.id.slice(-6).toUpperCase()}</p></div>

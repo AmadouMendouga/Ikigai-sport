@@ -7,7 +7,7 @@
 // règles, ce qui court-circuiterait cette garantie.
 //
 // Nécessite l'émulateur Firestore démarré (voir le script npm "test:rules",
-// qui utilise `firebase emulators:exec`).
+// qui utilise `firebase emulators:exec` avec un projet demo-* isolé).
 import { test, before, after } from "node:test";
 import fs from "node:fs";
 import path from "node:path";
@@ -17,12 +17,13 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const [emulatorHost, emulatorPort] = (process.env.FIRESTORE_EMULATOR_HOST || "127.0.0.1:8080").split(":");
+const emulatorProjectId = "demo-le-maillot-ideal-test";
 
 let testEnv;
 
 before(async () => {
   testEnv = await initializeTestEnvironment({
-    projectId: "le-maillot-ideal-test",
+    projectId: emulatorProjectId,
     firestore: {
       rules: fs.readFileSync(path.join(rootDir, "firestore.rules"), "utf8"),
       host: emulatorHost,
@@ -96,7 +97,7 @@ test("commandes et avis en attente refusés en lecture et en écriture, même po
 
 test("comptes clients refusés en lecture et en écriture, même pour le propriétaire du compte", async () => {
   // customers/{uid} (addendum 2) : même garantie que orders — tout passe par
-  // des Server Actions (Admin SDK), y compris pour le client lui-même en
+  // les Server Actions (Admin SDK), y compris pour le client lui-même en
   // lisant son propre profil.
   const anon = testEnv.unauthenticatedContext().firestore();
   await assertFails(getDoc(doc(anon, "customers", "client-test")));

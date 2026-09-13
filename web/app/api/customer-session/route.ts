@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { AuthError } from "@/lib/auth/dal";
 import { getCustomerProfile } from "@/lib/data/customer";
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
 
 // Miroir de app/api/session/route.ts (admin) pour les comptes clients — cookie
 // distinct (customer_session), pas de contrôle de custom claim : tout compte
@@ -13,6 +12,17 @@ export async function POST(request: Request) {
   if (typeof idToken !== "string" || !idToken) {
     return Response.json({ error: "idToken manquant." }, { status: 400 });
   }
+
+  // Firebase Admin n'est chargé que pour les opérations qui en ont besoin.
+  // Le GET public reste donc utilisable par un visiteur anonyme sans initialiser
+  // le SDK tant que la DAL n'a détecté aucune session client à vérifier.
+  let admin: typeof import("@/lib/firebase/admin");
+  try {
+    admin = await import("@/lib/firebase/admin");
+  } catch {
+    return Response.json({ error: "Service d'authentification indisponible." }, { status: 503 });
+  }
+  const { adminAuth, adminDb } = admin;
 
   let decoded;
   try {

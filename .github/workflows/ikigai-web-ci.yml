@@ -1,0 +1,67 @@
+name: IKIGAI Web CI
+
+on:
+  pull_request:
+    paths:
+      - "web/**"
+      - ".github/workflows/ikigai-web-ci.yml"
+  push:
+    branches:
+      - master
+    paths:
+      - "web/**"
+      - ".github/workflows/ikigai-web-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-web:
+    name: Lint, tests, rules and typecheck
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install dependencies
+        run: npm ci
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=critical
+      - name: Lint
+        run: npm run lint
+      - name: Critical tests
+        run: npm test
+      - name: Firestore security rules tests
+        run: npm run test:rules
+      - name: Generate Next route types
+        run: npx next typegen
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      # PageProps/LayoutProps sont générés par Next.js via `next typegen`.
+      # Les Security Rules sont testées contre l'émulateur Firestore avec un
+      # projet demo-* isolé : aucune donnée ou ressource Firebase de production
+      # n'est utilisée par ce check. Java 21 est épinglé pour rester compatible
+      # avec les prochaines versions de l'émulateur Firestore.
+      # L'audit bloque les vulnérabilités critiques réellement embarquées en
+      # production. Deux alertes modérées transitives restent actuellement dans
+      # gaxios -> uuid (GHSA-w5hq-g745-h8pq) avec Firebase Admin 14.4.0 ; les
+      # correctifs npm sans `--force` ne peuvent pas les supprimer. On garde donc
+      # le seuil critique plutôt que d'imposer une résolution transitive risquée.
+      # Les outils dev sont exclus pour éviter de confondre risque de build et
+      # risque utilisateur. Le build complet dépend volontairement des variables
+      # Firebase Admin et des données Firestore de l'environnement de déploiement.
+      # On ne copie pas ces secrets de production dans GitHub Actions : Vercel
+      # reste le check d'intégration qui exécute le vrai `next build` avec son
+      # propre environnement, tandis que cette CI valide sécurité prod, règles,
+      # lint, logique métier et types.

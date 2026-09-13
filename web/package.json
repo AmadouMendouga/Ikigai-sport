@@ -2,6 +2,9 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,8 +12,8 @@
     "lint": "eslint",
     "seed:firestore": "node scripts/seed-firestore.mjs",
     "create:admin": "node scripts/create-admin.mjs",
-    "test": "node --experimental-strip-types --test tests/lib.test.mjs tests/critical-actions.test.mjs",
-    "test:rules": "firebase emulators:exec --only firestore \"node --experimental-strip-types --test tests/firestore-rules.test.mjs\"",
+    "test": "node --experimental-strip-types --test tests/lib.test.mjs tests/critical-actions.test.mjs tests/campay-retry.test.mjs",
+    "test:rules": "firebase emulators:exec --project demo-le-maillot-ideal-test --only firestore \"node --experimental-strip-types --test tests/firestore-rules.test.mjs\"",
     "test:browser": "npm run build && node tests/browser-audit.mjs",
     "check": "npm run lint && npm run test && npm run test:rules && npm run test:browser"
   },
@@ -20,10 +23,10 @@
     "@vercel/analytics": "^2.0.1",
     "cloudinary": "^2.11.0",
     "firebase": "^12.4.0",
-    "firebase-admin": "^13.4.0",
+    "firebase-admin": "14.4.0",
     "jsqr": "^1.4.0",
     "leaflet": "^1.9.4",
-    "maplibre-gl": "^5.24.0",
+    "maplibre-gl": "6.9.0",
     "next": "16.3.3",
     "qrcode": "^1.5.4",
     "react": "19.2.8",

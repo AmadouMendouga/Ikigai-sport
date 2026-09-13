@@ -19,6 +19,21 @@ async function readErrorMessage(res: Response, fallback: string): Promise<string
   return body?.detail || body?.message || fallback;
 }
 
+export type CampayCollectOutcome = "rejected" | "unknown";
+
+/**
+ * Un refus HTTP explicite est définitif et permet une nouvelle tentative.
+ * Une panne réseau, un timeout, une erreur serveur ou une réponse invalide
+ * sont ambigus : la requête a pu atteindre CamPay. Dans ce cas on ne doit
+ * surtout pas libérer le stock ni relancer immédiatement un second débit.
+ */
+export class CampayCollectError extends Error {
+  constructor(message: string, readonly outcome: CampayCollectOutcome) {
+    super(message);
+    this.name = "CampayCollectError";
+  }
+}
+
 export interface CampayCollectInput {
   amount: number;
   from: string;
@@ -32,30 +47,61 @@ export interface CampayCollectResult {
   operator: string;
 }
 
+function collectOutcomeForHttpStatus(status: number): CampayCollectOutcome {
+  // 5xx : le fournisseur peut avoir effectué une partie du traitement avant
+  // de renvoyer l'erreur. 408/409/425 sont également ambigus pour un flux de
+  // paiement. La priorité est d'éviter un double débit, même si cela impose
+  // une réconciliation manuelle dans un cas rare.
+  if (status >= 500 || status === 408 || status === 409 || status === 425) return "unknown";
+  return "rejected";
+}
+
 /** Déclenche un prompt de paiement Mobile Money sur le téléphone du client. */
 export async function campayCollect(input: CampayCollectInput): Promise<CampayCollectResult> {
-  const res = await fetch(`${BASE_URL}/api/collect/`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify({
-      amount: String(input.amount),
-      currency: "XAF",
-      from: input.from,
-      description: input.description,
-      external_reference: input.externalReference,
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(await readErrorMessage(res, "CamPay a refusé la demande de paiement."));
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}/api/collect/`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({
+        amount: String(input.amount),
+        currency: "XAF",
+        from: input.from,
+        description: input.description,
+        external_reference: input.externalReference,
+      }),
+    });
+  } catch {
+    throw new CampayCollectError(
+      "CamPay est temporairement injoignable. Ne relancez pas immédiatement le paiement : nous vérifions la première tentative.",
+      "unknown"
+    );
   }
-  const body = await res.json();
+
+  if (!res.ok) {
+    const outcome = collectOutcomeForHttpStatus(res.status);
+    throw new CampayCollectError(
+      await readErrorMessage(
+        res,
+        outcome === "unknown"
+          ? "CamPay a renvoyé une réponse incertaine. Ne relancez pas immédiatement le paiement."
+          : "CamPay a refusé la demande de paiement."
+      ),
+      outcome
+    );
+  }
+
+  const body = await res.json().catch(() => null);
   if (
     !body ||
     typeof body.reference !== "string" || !body.reference ||
     typeof body.ussd_code !== "string" ||
     typeof body.operator !== "string"
   ) {
-    throw new Error("Réponse CamPay invalide lors de l'initialisation du paiement.");
+    throw new CampayCollectError(
+      "Réponse CamPay incomplète. Ne relancez pas immédiatement le paiement : nous vérifions la première tentative.",
+      "unknown"
+    );
   }
   return body as CampayCollectResult;
 }

@@ -2,7 +2,6 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { adminAuth } from "@/lib/firebase/admin";
 
 export class AuthError extends Error {}
 
@@ -15,6 +14,12 @@ export class AuthError extends Error {}
 export const verifyAdminSession = cache(async () => {
   const sessionCookie = (await cookies()).get("session")?.value;
   if (!sessionCookie) throw new AuthError("Aucune session.");
+
+  // Un visiteur sans cookie ne doit pas initialiser Firebase Admin. Le SDK est
+  // chargé seulement après la présence d'une session à vérifier ; une vraie
+  // panne/configuration serveur reste ainsi une erreur serveur et n'est pas
+  // maquillée en simple erreur d'authentification.
+  const { adminAuth } = await import("@/lib/firebase/admin");
 
   let decoded;
   try {
@@ -49,6 +54,8 @@ export async function requireAdminOrRedirect() {
 export const verifyCustomerSession = cache(async () => {
   const sessionCookie = (await cookies()).get("customer_session")?.value;
   if (!sessionCookie) throw new AuthError("Aucune session.");
+
+  const { adminAuth } = await import("@/lib/firebase/admin");
 
   let decoded;
   try {

@@ -22,7 +22,12 @@ export default async function PaiementPage({ params }: PageProps<"/[sport]/compt
       <div className="section">
         <div className="container" style={{ maxWidth: 480 }}>
           {order ? (
-            <PaymentStatusPoller orderId={order.id} initialStatus={order.paymentStatus} ussdCode={order.ussdCode} />
+            <PaymentStatusPoller
+              orderId={order.id}
+              initialStatus={order.paymentStatus}
+              initialReason={order.paymentFailureReason}
+              ussdCode={order.ussdCode}
+            />
           ) : (
             <div className="contact-card">
               <h3>Commande introuvable</h3>
