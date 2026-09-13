@@ -124,7 +124,8 @@
   line-height: 1.45;
 }
 
-.ik-app .payment-state-note {
+.ik-app .payment-state-note,
+.ik-app .payment-warning {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -135,6 +136,21 @@
   color: var(--on-surface-variant);
   font-size: .9rem;
   line-height: 1.45;
+}
+
+.ik-app .payment-warning {
+  border: 1px solid color-mix(in srgb, var(--brand-green) 32%, var(--outline-variant));
+  background: color-mix(in srgb, var(--brand-green) 8%, var(--surface));
+}
+
+.ik-app .payment-warning strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--on-surface);
+}
+
+.ik-app .payment-warning p {
+  margin: 0;
 }
 
 /* Mobile : navigation basse stable, contenu jamais caché dessous. */
