@@ -7,6 +7,7 @@ import "./ikigai-refonte-v2-components.css";
 import "./ikigai-rareui-polish.css";
 import "./ikigai-commerce-polish.css";
 import "./ikigai-journey-polish.css";
+import "./ikigai-refonte-v2-finalize.css";
 import { IconSprite } from "@/components/icons/IconSprite";
 import { ToastHost } from "@/components/Toast";
 import { Analytics } from "@vercel/analytics/next";
