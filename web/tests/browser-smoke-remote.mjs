@@ -105,6 +105,22 @@ try {
     await auditPage(browser, route, { width: 390, height: 844 }, "mobile");
   }
 
+  // L'endpoint de session doit pouvoir initialiser Firebase Admin sur le
+  // déploiement testé. Un faux token est forcément refusé en 401 ; un 5xx ici
+  // signale au contraire un problème de configuration/runtime serveur.
+  {
+    const response = await fetch(urlFor("api/customer-session"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken: "ikigai-smoke-invalid-token" }),
+      redirect: "manual",
+    });
+    check(
+      response.status === 401,
+      `Firebase Admin/session n'est pas opérationnel : POST /api/customer-session répond ${response.status} au lieu de 401`
+    );
+  }
+
   // Découvre une fiche depuis le catalogue live au lieu de figer un slug produit.
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
