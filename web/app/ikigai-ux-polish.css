@@ -117,6 +117,18 @@
   line-height: 1.35;
 }
 
+/* La piste `1fr` d'une grille conserve par défaut le min-content de son
+   enfant. Les pastilles/toolbar du catalogue pouvaient ainsi forcer la colonne
+   produits au-delà du viewport. `minmax(0, 1fr)` + `min-width: 0` autorisent
+   réellement la colonne à se contracter dans l'espace disponible. */
+.ik-app .shop-layout {
+  grid-template-columns: 268px minmax(0, 1fr);
+}
+
+.ik-app .shop-layout > :last-child {
+  min-width: 0;
+}
+
 /* États système : les messages importants ressemblent à des états, pas à des pubs. */
 .ik-app .auth-feedback,
 .ik-app .form-note,
@@ -167,6 +179,15 @@
   }
 }
 
+/* Le catalogue passe en une seule colonne sous 940 px comme dans lmi.css ; ce
+   rappel évite que la surcharge desktop `minmax()` réintroduise le panneau de
+   filtres latéral sur tablette/mobile. */
+@media (max-width: 940px) {
+  .ik-app .shop-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* Mobile : navigation basse stable, contenu jamais caché dessous. */
 @media (max-width: 760px) {
   .ik-storefront {
@@ -185,12 +206,24 @@
     padding: 18px;
   }
 
+  /* Ne pas utiliser `width:auto` avec left+right sur ce panneau fixed : selon
+     son containing block, le navigateur pouvait lui donner > 1000 px de large
+     même fermé. On l'ancre explicitement au viewport et on neutralise la
+     translation X héritée du layout desktop. */
   .ik-app .cart-panel {
-    inset: auto 8px calc(72px + env(safe-area-inset-bottom)) 8px;
-    width: auto;
-    max-width: none;
+    left: 8px;
+    right: auto;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    width: min(390px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+    transform: translateY(16px) scale(.9);
+    transform-origin: bottom left;
     border-radius: 22px;
     max-height: min(76dvh, 720px);
+  }
+
+  .ik-app .cart-panel.open {
+    transform: translateY(0) scale(1);
   }
 
   .ik-app .cp-item {
