@@ -1,20 +1,26 @@
 /* IKIGAI Sport — Refonte V2
- * Synthèse des références Utile(1): interface sportive premium, dense mais calme,
- * hiérarchie nette, surfaces blanches, vert #22C55E réservé aux actions/états.
- * Cette couche est volontairement additive afin de ne pas toucher à la logique métier.
+ * Synthèse des références Utile + séries UX/UI envoyées par le client.
+ * Objectif : design system cohérent, hiérarchie forte, friction minimale, mobile-first.
+ * Cette couche reste additive : aucune logique métier n'est modifiée ici.
  */
 
 :root {
   --ik-green: #22c55e;
-  --ik-green-strong: #16a34a;
-  --ik-ink: #111827;
-  --ik-muted: #64748b;
-  --ik-canvas: #f6f8fb;
+  --ik-green-strong: #15803d;
+  --ik-green-soft: #ecfdf3;
+  --ik-ink: #162033;
+  --ik-muted: #667085;
+  --ik-canvas: #f7f9fc;
   --ik-card: #ffffff;
-  --ik-line: #e5e7eb;
+  --ik-line: #e7ebf0;
+  --ik-danger: #c53b45;
+  --ik-danger-soft: #fff1f2;
+  --ik-warning: #b66a08;
+  --ik-warning-soft: #fff8e8;
   --ik-radius-sm: 10px;
   --ik-radius-md: 14px;
   --ik-radius-lg: 20px;
+  --ik-control: 48px;
   --ik-shadow-card: 0 1px 2px rgb(15 23 42 / 4%), 0 10px 30px rgb(15 23 42 / 5%);
   --ik-shadow-float: 0 18px 48px rgb(15 23 42 / 14%);
 }
@@ -22,37 +28,66 @@
 .ik-app {
   --brand-green: var(--ik-green);
   color: var(--on-surface);
+  background: var(--ik-canvas);
 }
 
-/* Structure générale */
+/* Structure générale — grille stable, espaces cohérents, pas de décor gratuit. */
 .ik-app .container { max-width: 1240px; }
 .ik-app .section { padding-block: 52px; }
 .ik-app .section-title,
-.ik-app .page-title { letter-spacing: -.035em; }
+.ik-app .page-title {
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
 .ik-app .section-subtitle,
-.ik-app .page-subtitle { color: var(--on-surface-variant); max-width: 68ch; }
+.ik-app .page-subtitle {
+  color: var(--on-surface-variant);
+  max-width: 68ch;
+}
 
-/* Header : barre e-commerce nette, pas de décoration gratuite. */
+/* Hiérarchie typographique : peu de niveaux, clairement séparés. */
+.ik-app h1,
+.ik-app h2,
+.ik-app h3 { color: var(--ik-ink); }
+.ik-app h1 { font-weight: 700; }
+.ik-app h2,
+.ik-app h3 { font-weight: 600; }
+.ik-app small,
+.ik-app .muted,
+.ik-app .text-muted { color: var(--ik-muted); }
+
+/* Icônes : même géométrie visuelle partout. */
+.ik-app .icon-btn,
+.ik-app button[aria-label],
+.ik-app a[aria-label] {
+  min-width: 44px;
+  min-height: 44px;
+}
+.ik-app .icon-btn svg,
+.ik-app button svg,
+.ik-app a svg { flex: 0 0 auto; }
+
+/* Header : familier, simple, e-commerce. */
 .ik-app .site-header,
 .ik-app .app-header,
 .ik-app header.header {
   border-bottom: 1px solid var(--outline-variant);
   box-shadow: none;
-  backdrop-filter: saturate(140%) blur(14px);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: saturate(135%) blur(12px);
 }
 
 .ik-app .header-search,
 .ik-app .search-box,
 .ik-app .search-input {
+  min-height: 44px;
   border-radius: 999px;
   background: var(--surface-container-low);
 }
 
-/* Hero : grande promesse, CTA unique et image prioritaire. */
+/* Hero : promesse claire, CTA principal unique. */
 .ik-app .hero,
-.ik-app .page-hero {
-  overflow: hidden;
-}
+.ik-app .page-hero { overflow: hidden; }
 .ik-app .hero h1,
 .ik-app .page-hero h1 {
   letter-spacing: -.045em;
@@ -61,12 +96,13 @@
 .ik-app .hero p,
 .ik-app .page-hero p { max-width: 62ch; }
 
-/* Boutons : plus francs, moins d'effets. */
+/* Boutons : loi de Fitts + Von Restorff. */
 .ik-app .btn {
-  min-height: 46px;
+  min-height: var(--ik-control);
   border-radius: 12px;
   padding-inline: 20px;
   box-shadow: none;
+  font-weight: 600;
 }
 .ik-app .btn-primary,
 .ik-app .cp-checkout {
@@ -81,8 +117,17 @@
   border: 1px solid var(--outline-variant);
   color: var(--on-surface);
 }
+.ik-app .btn:focus-visible,
+.ik-app button:focus-visible,
+.ik-app a:focus-visible,
+.ik-app input:focus-visible,
+.ik-app select:focus-visible,
+.ik-app textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ik-green) 28%, transparent);
+  outline-offset: 2px;
+}
 
-/* Catégories : navigation horizontale compacte façon commerce mobile moderne. */
+/* Catégories / filtres : choix réduits et faciles à scanner. */
 .ik-app .category-pill,
 .ik-app .filter-chip,
 .ik-app .chip {
@@ -98,15 +143,16 @@
 .ik-app .category-pill.active,
 .ik-app .filter-chip.active,
 .ik-app .chip.active {
-  background: var(--on-surface);
-  border-color: var(--on-surface);
-  color: var(--surface);
+  background: var(--ik-ink);
+  border-color: var(--ik-ink);
+  color: #fff;
 }
 
 /* Catalogue */
 .ik-app .shop-layout { gap: 28px; }
 .ik-app .filters {
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--ik-line);
+  border-radius: var(--ik-radius-md);
   background: var(--surface);
   box-shadow: none;
   padding: 18px;
@@ -117,7 +163,7 @@
 .ik-app .product-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--ik-line);
   border-radius: var(--ik-radius-md);
   background: var(--surface);
   box-shadow: none;
@@ -125,17 +171,18 @@
 }
 .ik-app .product-card:hover {
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--ik-green) 28%, var(--outline-variant));
+  border-color: color-mix(in srgb, var(--ik-green) 28%, var(--ik-line));
   box-shadow: var(--ik-shadow-card);
 }
 .ik-app .product-card img,
 .ik-app .product-image img {
   object-fit: contain;
+  background: color-mix(in srgb, var(--surface) 96%, var(--ik-canvas));
 }
 .ik-app .product-body { padding: 14px 14px 16px; }
 .ik-app .product-title {
   color: var(--on-surface);
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -145,11 +192,11 @@
 .ik-app .product-price,
 .ik-app .price-current {
   font-size: 1.08rem;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: -.02em;
 }
 .ik-app .old-price,
-.ik-app .price-old { color: var(--on-surface-variant); }
+.ik-app .price-old { color: var(--ik-muted); }
 .ik-app .badge,
 .ik-app .product-badge {
   border-radius: 999px;
@@ -157,38 +204,132 @@
   font-weight: 700;
 }
 
-/* Fiche produit : galerie à gauche, décision d'achat lisible à droite. */
+/* L'urgence n'est affichée que si elle correspond à une donnée réelle. */
+.ik-app .stock-low,
+.ik-app .urgency-badge {
+  color: var(--ik-warning);
+  background: var(--ik-warning-soft);
+  border: 1px solid color-mix(in srgb, var(--ik-warning) 18%, transparent);
+}
+
+/* Fiche produit : produit, prix puis décision. */
 .ik-app .product-detail,
 .ik-app .product-detail-grid { gap: 42px; }
 .ik-app .product-gallery,
 .ik-app .product-main-image {
   border-radius: var(--ik-radius-lg);
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--ik-line);
   background: var(--surface);
 }
 .ik-app .product-detail h1 { letter-spacing: -.035em; }
 .ik-app .product-actions { gap: 10px; }
 
-/* Formulaires/auth : cartes compactes, labels visibles. */
+/* Formulaires : labels persistants, erreurs locales, champs confortables. */
 .ik-app .auth-card,
 .ik-app .contact-card,
 .ik-app .account-card,
 .ik-app .order-card,
 .ik-app .ik-empty-card {
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--ik-line);
   border-radius: var(--ik-radius-lg);
   background: var(--surface);
   box-shadow: none;
 }
+.ik-app label,
+.ik-app .field-label {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--ik-ink);
+}
 .ik-app .auth-input,
 .ik-app .form-row input,
 .ik-app .form-row select,
-.ik-app .form-row textarea {
+.ik-app .form-row textarea,
+.ik-app input:not([type="checkbox"]):not([type="radio"]),
+.ik-app select,
+.ik-app textarea {
+  min-height: var(--ik-control);
   border-radius: 12px;
+  border-color: var(--ik-line);
   background: var(--surface-container-lowest);
 }
+.ik-app [aria-invalid="true"],
+.ik-app .field-error input,
+.ik-app .field-error select,
+.ik-app .field-error textarea {
+  border-color: var(--ik-danger) !important;
+}
+.ik-app .error-message,
+.ik-app .field-error-message {
+  display: block;
+  margin-top: 6px;
+  color: var(--ik-danger);
+  font-size: .82rem;
+  line-height: 1.35;
+}
+.ik-app .auth-feedback.error,
+.ik-app .form-error {
+  background: var(--ik-danger-soft);
+  border-color: color-mix(in srgb, var(--ik-danger) 18%, transparent);
+  color: var(--ik-danger);
+}
 
-/* Commandes : le statut devient l'information dominante. */
+/* Progression checkout / commande : effet Zeigarnik, sans surcharge. */
+.ik-app .checkout-steps,
+.ik-app .progress-steps,
+.ik-app .order-progress {
+  display: grid;
+  gap: 10px;
+}
+.ik-app .checkout-steps .step,
+.ik-app .progress-steps .step,
+.ik-app .order-progress .step {
+  position: relative;
+  min-height: 44px;
+  padding: 10px 12px 10px 46px;
+  border-radius: 12px;
+  color: var(--ik-muted);
+  background: var(--surface-container-low);
+}
+.ik-app .checkout-steps .step::before,
+.ik-app .progress-steps .step::before,
+.ik-app .order-progress .step::before {
+  content: attr(data-step);
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--ik-line);
+  background: var(--surface);
+  color: var(--ik-muted);
+  font-size: .75rem;
+  font-weight: 700;
+}
+.ik-app .checkout-steps .step.active,
+.ik-app .progress-steps .step.active,
+.ik-app .order-progress .step.active {
+  color: var(--ik-ink);
+  background: var(--ik-green-soft);
+}
+.ik-app .checkout-steps .step.active::before,
+.ik-app .progress-steps .step.active::before,
+.ik-app .order-progress .step.active::before,
+.ik-app .checkout-steps .step.done::before,
+.ik-app .progress-steps .step.done::before,
+.ik-app .order-progress .step.done::before {
+  border-color: var(--ik-green);
+  background: var(--ik-green);
+  color: #fff;
+}
+
+/* Commandes : le statut et l'étape actuelle dominent. */
 .ik-app .order-status,
 .ik-app .status-pill {
   border-radius: 999px;
@@ -196,41 +337,53 @@
 }
 .ik-app .order-timeline { position: relative; }
 .ik-app .order-card { transition: border-color .15s ease, transform .15s ease; }
-.ik-app .order-card:hover { border-color: color-mix(in srgb, var(--ik-green) 24%, var(--outline-variant)); }
+.ik-app .order-card:hover { border-color: color-mix(in srgb, var(--ik-green) 24%, var(--ik-line)); }
 
-/* Panier : feuille flottante lisible. */
+/* Panier : feuille lisible, action checkout dominante. */
 .ik-app .cart-panel {
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--ik-line);
   border-radius: 22px;
   background: var(--surface);
   box-shadow: var(--ik-shadow-float);
 }
-.ik-app .cp-item { border-bottom-color: var(--outline-variant); }
+.ik-app .cp-item { border-bottom-color: var(--ik-line); }
 .ik-app .cp-qty button {
-  border: 1px solid var(--outline-variant);
+  min-width: 40px;
+  min-height: 40px;
+  border: 1px solid var(--ik-line);
   background: var(--surface-container-low);
 }
 
-/* Bottom nav : 4/5 destinations maximum visuellement, état actif vert. */
+/* Bottom nav : 4/5 destinations maximum, état actif net. */
 .ik-app .ik-bottom-nav {
-  background: color-mix(in srgb, var(--surface) 96%, transparent);
-  backdrop-filter: blur(18px) saturate(150%);
-  border-top: 1px solid var(--outline-variant);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(16px) saturate(135%);
+  border-top: 1px solid var(--ik-line);
   box-shadow: 0 -8px 30px rgb(15 23 42 / 6%);
 }
-.ik-app .ik-bottom-nav a { color: var(--on-surface-variant); font-weight: 600; }
+.ik-app .ik-bottom-nav a {
+  min-height: 52px;
+  color: var(--on-surface-variant);
+  font-weight: 600;
+}
 .ik-app .ik-bottom-nav a.active,
 .ik-app .ik-bottom-nav a[aria-current="page"] { color: var(--ik-green-strong); }
+
+/* Glass : uniquement sur surfaces flottantes qui en bénéficient. */
+.ik-app .map-overlay,
+.ik-app .floating-toolbar {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ik-line) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(125%);
+}
 
 /* États et feedback */
 .ik-app .payment-warning,
 .ik-app .form-note,
-.ik-app .auth-feedback {
-  border-radius: 12px;
-}
+.ik-app .auth-feedback { border-radius: 12px; }
 .ik-app .skeleton { border-radius: 12px; }
 
-/* Desktop dense, mobile respirant */
+/* Mobile : moins de choix simultanés, CTA facilement atteignable. */
 @media (max-width: 940px) {
   .ik-app .section { padding-block: 38px; }
   .ik-app .shop-layout { gap: 18px; }
@@ -249,11 +402,23 @@
   .ik-app .product-price,
   .ik-app .price-current { font-size: 1rem; }
   .ik-app .product-card { border-radius: 12px; }
-  .ik-app .btn { min-height: 48px; }
+  .ik-app .btn { min-height: 50px; }
   .ik-app .auth-card,
   .ik-app .contact-card,
   .ik-app .account-card,
   .ik-app .order-card { border-radius: 16px; }
+  .ik-app .product-actions.sticky-mobile,
+  .ik-app .checkout-actions.sticky-mobile {
+    position: sticky;
+    bottom: calc(64px + env(safe-area-inset-bottom));
+    z-index: 20;
+    padding: 10px;
+    margin-inline: -10px;
+    border: 1px solid var(--ik-line);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    backdrop-filter: blur(14px);
+  }
 }
 
 @media (max-width: 420px) {
@@ -262,7 +427,38 @@
   .ik-app .product-grid { gap: 8px; }
 }
 
+/* Dark mode : jamais de noir pur, plusieurs niveaux de surface. */
+@media (prefers-color-scheme: dark) {
+  .ik-app:not([data-theme="light"]) {
+    --ik-canvas: #10151d;
+    --ik-card: #171e28;
+    --ik-ink: #eef3f8;
+    --ik-muted: #98a2b3;
+    --ik-line: #2a3442;
+    --ik-green-soft: #123222;
+    --ik-danger-soft: #351b20;
+    --ik-warning-soft: #332715;
+  }
+}
+
+.ik-app[data-theme="dark"] {
+  --ik-canvas: #10151d;
+  --ik-card: #171e28;
+  --ik-ink: #eef3f8;
+  --ik-muted: #98a2b3;
+  --ik-line: #2a3442;
+  --ik-green-soft: #123222;
+  --ik-danger-soft: #351b20;
+  --ik-warning-soft: #332715;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .ik-app .product-card,
-  .ik-app .order-card { transition: none; }
+  .ik-app *,
+  .ik-app *::before,
+  .ik-app *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
 }
