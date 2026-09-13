@@ -2,6 +2,9 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -19,7 +22,7 @@
     "@types/leaflet": "^1.9.22",
     "cloudinary": "^2.11.0",
     "firebase": "^12.4.0",
-    "firebase-admin": "^13.4.0",
+    "firebase-admin": "14.4.0",
     "jsqr": "^1.4.0",
     "leaflet": "^1.9.4",
     "maplibre-gl": "6.9.0",
