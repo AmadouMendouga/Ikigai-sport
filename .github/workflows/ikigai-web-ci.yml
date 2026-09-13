@@ -35,11 +35,14 @@ jobs:
         run: npm run lint
       - name: Critical tests
         run: npm test
+      - name: Generate Next route types
+        run: npx next typegen
       - name: TypeScript typecheck
         run: npx tsc --noEmit
 
-      # Le build Next dépend volontairement des variables Firebase Admin et
+      # PageProps/LayoutProps sont générés par Next.js via `next typegen`.
+      # Le build complet dépend volontairement des variables Firebase Admin et
       # des données Firestore de l'environnement de déploiement. On ne copie
       # pas ces secrets de production dans GitHub Actions : Vercel reste le
       # check d'intégration qui exécute le vrai `next build` avec son propre
-      # environnement, tandis que cette CI valide statiquement le code.
+      # environnement, tandis que cette CI valide lint, logique métier et types.
