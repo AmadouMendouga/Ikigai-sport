@@ -1,0 +1,268 @@
+/* IKIGAI Sport — Refonte V2
+ * Synthèse des références Utile(1): interface sportive premium, dense mais calme,
+ * hiérarchie nette, surfaces blanches, vert #22C55E réservé aux actions/états.
+ * Cette couche est volontairement additive afin de ne pas toucher à la logique métier.
+ */
+
+:root {
+  --ik-green: #22c55e;
+  --ik-green-strong: #16a34a;
+  --ik-ink: #111827;
+  --ik-muted: #64748b;
+  --ik-canvas: #f6f8fb;
+  --ik-card: #ffffff;
+  --ik-line: #e5e7eb;
+  --ik-radius-sm: 10px;
+  --ik-radius-md: 14px;
+  --ik-radius-lg: 20px;
+  --ik-shadow-card: 0 1px 2px rgb(15 23 42 / 4%), 0 10px 30px rgb(15 23 42 / 5%);
+  --ik-shadow-float: 0 18px 48px rgb(15 23 42 / 14%);
+}
+
+.ik-app {
+  --brand-green: var(--ik-green);
+  color: var(--on-surface);
+}
+
+/* Structure générale */
+.ik-app .container { max-width: 1240px; }
+.ik-app .section { padding-block: 52px; }
+.ik-app .section-title,
+.ik-app .page-title { letter-spacing: -.035em; }
+.ik-app .section-subtitle,
+.ik-app .page-subtitle { color: var(--on-surface-variant); max-width: 68ch; }
+
+/* Header : barre e-commerce nette, pas de décoration gratuite. */
+.ik-app .site-header,
+.ik-app .app-header,
+.ik-app header.header {
+  border-bottom: 1px solid var(--outline-variant);
+  box-shadow: none;
+  backdrop-filter: saturate(140%) blur(14px);
+}
+
+.ik-app .header-search,
+.ik-app .search-box,
+.ik-app .search-input {
+  border-radius: 999px;
+  background: var(--surface-container-low);
+}
+
+/* Hero : grande promesse, CTA unique et image prioritaire. */
+.ik-app .hero,
+.ik-app .page-hero {
+  overflow: hidden;
+}
+.ik-app .hero h1,
+.ik-app .page-hero h1 {
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+.ik-app .hero p,
+.ik-app .page-hero p { max-width: 62ch; }
+
+/* Boutons : plus francs, moins d'effets. */
+.ik-app .btn {
+  min-height: 46px;
+  border-radius: 12px;
+  padding-inline: 20px;
+  box-shadow: none;
+}
+.ik-app .btn-primary,
+.ik-app .cp-checkout {
+  background: var(--ik-green);
+  color: #fff;
+  box-shadow: none;
+}
+.ik-app .btn-primary:hover,
+.ik-app .cp-checkout:hover { background: var(--ik-green-strong); }
+.ik-app .btn-outline {
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  color: var(--on-surface);
+}
+
+/* Catégories : navigation horizontale compacte façon commerce mobile moderne. */
+.ik-app .category-pill,
+.ik-app .filter-chip,
+.ik-app .chip {
+  min-height: 40px;
+  padding-inline: 15px;
+  border-radius: 999px;
+  border: 1px solid var(--outline-variant);
+  background: var(--surface);
+  color: var(--on-surface);
+  font-weight: 600;
+  box-shadow: none;
+}
+.ik-app .category-pill.active,
+.ik-app .filter-chip.active,
+.ik-app .chip.active {
+  background: var(--on-surface);
+  border-color: var(--on-surface);
+  color: var(--surface);
+}
+
+/* Catalogue */
+.ik-app .shop-layout { gap: 28px; }
+.ik-app .filters {
+  border: 1px solid var(--outline-variant);
+  background: var(--surface);
+  box-shadow: none;
+  padding: 18px;
+}
+.ik-app .products-grid,
+.ik-app .product-grid { gap: 18px; }
+
+.ik-app .product-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--ik-radius-md);
+  background: var(--surface);
+  box-shadow: none;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.ik-app .product-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--ik-green) 28%, var(--outline-variant));
+  box-shadow: var(--ik-shadow-card);
+}
+.ik-app .product-card img,
+.ik-app .product-image img {
+  object-fit: contain;
+}
+.ik-app .product-body { padding: 14px 14px 16px; }
+.ik-app .product-title {
+  color: var(--on-surface);
+  font-weight: 650;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ik-app .product-price,
+.ik-app .price-current {
+  font-size: 1.08rem;
+  font-weight: 750;
+  letter-spacing: -.02em;
+}
+.ik-app .old-price,
+.ik-app .price-old { color: var(--on-surface-variant); }
+.ik-app .badge,
+.ik-app .product-badge {
+  border-radius: 999px;
+  box-shadow: none;
+  font-weight: 700;
+}
+
+/* Fiche produit : galerie à gauche, décision d'achat lisible à droite. */
+.ik-app .product-detail,
+.ik-app .product-detail-grid { gap: 42px; }
+.ik-app .product-gallery,
+.ik-app .product-main-image {
+  border-radius: var(--ik-radius-lg);
+  border: 1px solid var(--outline-variant);
+  background: var(--surface);
+}
+.ik-app .product-detail h1 { letter-spacing: -.035em; }
+.ik-app .product-actions { gap: 10px; }
+
+/* Formulaires/auth : cartes compactes, labels visibles. */
+.ik-app .auth-card,
+.ik-app .contact-card,
+.ik-app .account-card,
+.ik-app .order-card,
+.ik-app .ik-empty-card {
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--ik-radius-lg);
+  background: var(--surface);
+  box-shadow: none;
+}
+.ik-app .auth-input,
+.ik-app .form-row input,
+.ik-app .form-row select,
+.ik-app .form-row textarea {
+  border-radius: 12px;
+  background: var(--surface-container-lowest);
+}
+
+/* Commandes : le statut devient l'information dominante. */
+.ik-app .order-status,
+.ik-app .status-pill {
+  border-radius: 999px;
+  font-weight: 700;
+}
+.ik-app .order-timeline { position: relative; }
+.ik-app .order-card { transition: border-color .15s ease, transform .15s ease; }
+.ik-app .order-card:hover { border-color: color-mix(in srgb, var(--ik-green) 24%, var(--outline-variant)); }
+
+/* Panier : feuille flottante lisible. */
+.ik-app .cart-panel {
+  border: 1px solid var(--outline-variant);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--ik-shadow-float);
+}
+.ik-app .cp-item { border-bottom-color: var(--outline-variant); }
+.ik-app .cp-qty button {
+  border: 1px solid var(--outline-variant);
+  background: var(--surface-container-low);
+}
+
+/* Bottom nav : 4/5 destinations maximum visuellement, état actif vert. */
+.ik-app .ik-bottom-nav {
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  backdrop-filter: blur(18px) saturate(150%);
+  border-top: 1px solid var(--outline-variant);
+  box-shadow: 0 -8px 30px rgb(15 23 42 / 6%);
+}
+.ik-app .ik-bottom-nav a { color: var(--on-surface-variant); font-weight: 600; }
+.ik-app .ik-bottom-nav a.active,
+.ik-app .ik-bottom-nav a[aria-current="page"] { color: var(--ik-green-strong); }
+
+/* États et feedback */
+.ik-app .payment-warning,
+.ik-app .form-note,
+.ik-app .auth-feedback {
+  border-radius: 12px;
+}
+.ik-app .skeleton { border-radius: 12px; }
+
+/* Desktop dense, mobile respirant */
+@media (max-width: 940px) {
+  .ik-app .section { padding-block: 38px; }
+  .ik-app .shop-layout { gap: 18px; }
+  .ik-app .filters { border-radius: 14px; }
+}
+
+@media (max-width: 760px) {
+  .ik-app .container { padding-inline: 16px; }
+  .ik-app .section { padding-block: 30px; }
+  .ik-app .hero h1,
+  .ik-app .page-hero h1 { font-size: clamp(1.8rem, 8vw, 2.45rem); }
+  .ik-app .products-grid,
+  .ik-app .product-grid { gap: 10px; }
+  .ik-app .product-body { padding: 11px 11px 13px; }
+  .ik-app .product-title { font-size: .9rem; }
+  .ik-app .product-price,
+  .ik-app .price-current { font-size: 1rem; }
+  .ik-app .product-card { border-radius: 12px; }
+  .ik-app .btn { min-height: 48px; }
+  .ik-app .auth-card,
+  .ik-app .contact-card,
+  .ik-app .account-card,
+  .ik-app .order-card { border-radius: 16px; }
+}
+
+@media (max-width: 420px) {
+  .ik-app .container { padding-inline: 12px; }
+  .ik-app .products-grid,
+  .ik-app .product-grid { gap: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ik-app .product-card,
+  .ik-app .order-card { transition: none; }
+}
