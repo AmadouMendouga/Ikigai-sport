@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./lmi.css";
 import "./ikigai-ui.css";
 import { IconSprite } from "@/components/icons/IconSprite";
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <IconSprite />
         {children}
         <ToastHost />
+        <Analytics />
       </body>
     </html>
   );
