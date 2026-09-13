@@ -65,7 +65,13 @@ export function CartPanel({ settings }: { settings: SiteSettings }) {
       requestId: checkoutRequestId("campay"),
     });
     if (!result.ok) {
-      if (checkoutKeysRef.current) checkoutKeysRef.current.campay = crypto.randomUUID();
+      // Ne renouveler la clé que si le serveur confirme qu'une nouvelle
+      // tentative est sans risque. Pour une erreur ambiguë ou une initiation
+      // encore en cours, garder la même clé préserve l'idempotence et évite
+      // de déclencher un deuxième paiement/réservation au clic suivant.
+      if (result.retrySafe && checkoutKeysRef.current) {
+        checkoutKeysRef.current.campay = crypto.randomUUID();
+      }
       showToast(result.error, "error", true);
       throw new Error(result.error);
     }
