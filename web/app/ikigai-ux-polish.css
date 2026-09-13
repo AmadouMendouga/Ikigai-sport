@@ -1,0 +1,197 @@
+/*
+ * IKIGAI UX polish — 2026-09-13
+ * Principes retenus des références Utile.zip : hiérarchie simple, surfaces
+ * calmes, contraste net, contrôles tactiles confortables, focus visible et
+ * priorité au contenu sur les décorations.
+ */
+
+.ik-app {
+  --ux-control: 44px;
+  --ux-field: 50px;
+  --ux-radius: 16px;
+  --ux-soft-shadow: 0 8px 28px rgb(15 40 24 / 7%);
+}
+
+/* Tous les contrôles interactifs importants restent utilisables au pouce. */
+.ik-app button,
+.ik-app .btn,
+.ik-app [role="button"],
+.ik-app .link-btn,
+.ik-app .auth-social-btn,
+.ik-app .category-pill,
+.ik-app .ik-bottom-nav a {
+  min-height: var(--ux-control);
+}
+
+.ik-app button:focus-visible,
+.ik-app a:focus-visible,
+.ik-app input:focus-visible,
+.ik-app select:focus-visible,
+.ik-app textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--brand-green) 38%, transparent);
+  outline-offset: 2px;
+}
+
+/* Formulaires : une seule lecture verticale, sans bruit visuel. */
+.ik-app .auth-form,
+.ik-app .contact-card form {
+  gap: 16px;
+}
+
+.ik-app .auth-field label,
+.ik-app .form-row label {
+  font-weight: 600;
+  color: var(--on-surface);
+}
+
+.ik-app .auth-input,
+.ik-app .form-row input,
+.ik-app .form-row select,
+.ik-app .form-row textarea,
+.ik-app .search-input,
+.ik-app .sort-select {
+  min-height: var(--ux-field);
+  border-radius: var(--ux-radius);
+  border-color: var(--outline-variant);
+  background: var(--surface);
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.ik-app .auth-input:focus-within,
+.ik-app .form-row input:focus,
+.ik-app .form-row select:focus,
+.ik-app .form-row textarea:focus,
+.ik-app .search-input:focus,
+.ik-app .sort-select:focus {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-green) 15%, transparent);
+}
+
+.ik-app .auth-input .icon-trail {
+  width: var(--ux-control);
+  min-width: var(--ux-control);
+  height: var(--ux-control);
+  border-radius: 999px;
+}
+
+/* Panier : actions quantité vraiment tactiles, hiérarchie prix > détails. */
+.ik-app .cp-qty {
+  gap: 4px;
+}
+
+.ik-app .cp-qty button {
+  width: var(--ux-control);
+  min-width: var(--ux-control);
+  height: var(--ux-control);
+  border-radius: 12px;
+}
+
+.ik-app .cp-price {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ik-app .cp-checkout,
+.ik-app .cart-panel .btn-block {
+  min-height: 50px;
+}
+
+/* Cartes : moins d'effet, davantage de respiration et de lisibilité. */
+.ik-app .product-card,
+.ik-app .contact-card,
+.ik-app .filters,
+.ik-app .ik-empty-card {
+  border-radius: var(--ux-radius);
+}
+
+.ik-app .product-card:hover {
+  transform: translateY(-1px);
+}
+
+.ik-app .product-body {
+  gap: 10px;
+}
+
+.ik-app .product-title {
+  font-size: .98rem;
+  line-height: 1.35;
+}
+
+/* États système : les messages importants ressemblent à des états, pas à des pubs. */
+.ik-app .auth-feedback,
+.ik-app .form-note,
+.ik-app .cp-delivery {
+  line-height: 1.45;
+}
+
+.ik-app .payment-state-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-container);
+  color: var(--on-surface-variant);
+  font-size: .9rem;
+  line-height: 1.45;
+}
+
+/* Mobile : navigation basse stable, contenu jamais caché dessous. */
+@media (max-width: 760px) {
+  .ik-storefront {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .ik-app .section {
+    padding-block: 28px;
+  }
+
+  .ik-app .page-hero {
+    padding: 22px 0;
+  }
+
+  .ik-app .contact-card {
+    padding: 18px;
+  }
+
+  .ik-app .cart-panel {
+    inset: auto 8px calc(72px + env(safe-area-inset-bottom)) 8px;
+    width: auto;
+    max-width: none;
+    border-radius: 22px;
+    max-height: min(76dvh, 720px);
+  }
+
+  .ik-app .cp-item {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .ik-app .cp-price {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 2px;
+  }
+
+  .ik-app .ik-bottom-nav {
+    min-height: calc(64px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--outline-variant);
+    box-shadow: 0 -8px 24px rgb(15 40 24 / 6%);
+  }
+
+  .ik-app .ik-bottom-nav a {
+    min-width: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ik-app *,
+  .ik-app *::before,
+  .ik-app *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
