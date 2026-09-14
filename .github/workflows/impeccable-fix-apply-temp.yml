@@ -72,8 +72,13 @@ jobs:
               lmi,
               '  transition: width .25s ease, background-color .25s ease;',
               '  transition: background-color .25s ease;',
-              'progress dot width transitions',
-              count=2,
+              'testimonial progress width transition',
+          )
+          lmi = must_replace(
+              lmi,
+              '  border: none; padding: 0; transition: width .25s ease, background-color .25s ease;',
+              '  border: none; padding: 0; transition: background-color .25s ease;',
+              'portal hero dot width transition',
           )
           lmi = must_replace(
               lmi,
@@ -141,7 +146,7 @@ jobs:
           final = final_path.read_text()
           marker = '/* Impeccable 4.1 — contraste du hero et surfaces sans effet IA. */'
           if marker not in final:
-              final += '''\n\n/* Impeccable 4.1 — contraste du hero et surfaces sans effet IA. */\n.ik-app .portal-hero-scrim::after {\n  background: linear-gradient(90deg, rgb(0 0 0 / 68%) 0%, rgb(0 0 0 / 28%) 58%, transparent 88%);\n}\n\n.ik-app .portal-hero-content h1,\n.ik-app .portal-hero-content h2,\n.ik-app .portal-hero-content p {\n  color: #fff;\n  text-shadow: none;\n}\n\n.ik-app .portal-hero-content p { opacity: 1; }\n\n/* Les trois colonnes de navigation du footer gardent le même rythme. */\n.ik-app .footer-grid > div:not(.footer-brand) h4 {\n  margin-top: 16px;\n  margin-bottom: 10px;\n}\n'''
+              final += '''\n\n/* Impeccable 4.1 — contraste du hero et surfaces sans effet IA. */\n.ik-app .portal-hero-scrim::after {\n  background: linear-gradient(90deg, rgb(0 0 0 / 68%) 0%, rgb(0 0 0 / 28%) 58%, transparent 88%);\n}\n\n.ik-app .portal-hero-content h1,\n.ik-app .portal-hero-content h2,\n.ik-app .portal-hero-content p {\n  color: #fff;\n  text-shadow: none;\n}\n\n.ik-app .portal-hero-content p { opacity: 1; }\n\n/* Les colonnes de navigation du footer gardent le même rythme. */\n.ik-app .footer-grid > div:not(.footer-brand) h4 {\n  margin-top: 16px;\n  margin-bottom: 10px;\n}\n'''
           final_path.write_text(final)
           PY
 
