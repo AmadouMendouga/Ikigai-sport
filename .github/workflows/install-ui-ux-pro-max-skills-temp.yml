@@ -1,0 +1,83 @@
+name: Install UI UX Pro Max skills (temporary)
+
+on:
+  push:
+    branches:
+      - chore/install-ui-ux-pro-max-skills
+    paths:
+      - .github/workflows/install-ui-ux-pro-max-skills-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  install-skills:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout IKIGAI Sport
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout UI UX Pro Max source
+        uses: actions/checkout@v4
+        with:
+          repository: nextlevelbuilder/ui-ux-pro-max-skill
+          ref: main
+          path: _vendor/ui-ux-pro-max-skill
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build upstream CLI from the requested repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd _vendor/ui-ux-pro-max-skill/cli
+          npm ci
+          npm run sync:assets
+          npm run build
+
+      - name: Install skills for Claude and universal AI agents
+        shell: bash
+        run: |
+          set -euo pipefail
+          node _vendor/ui-ux-pro-max-skill/cli/dist/index.js init --ai claude
+          node _vendor/ui-ux-pro-max-skill/cli/dist/index.js init --ai universal
+
+      - name: Preserve upstream license and provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_SHA="$(git -C _vendor/ui-ux-pro-max-skill rev-parse HEAD)"
+          mkdir -p third_party/ui-ux-pro-max-skill
+          cp _vendor/ui-ux-pro-max-skill/LICENSE third_party/ui-ux-pro-max-skill/LICENSE
+          cat > third_party/ui-ux-pro-max-skill/NOTICE.md <<EOF
+          # UI UX Pro Max Skill — vendored agent skills
+
+          Source: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+          Upstream commit: ${SOURCE_SHA}
+          License: MIT (see LICENSE in this directory)
+
+          Installed project-locally for IKIGAI Sport using the upstream CLI built from the source repository above.
+          The Claude installation lives under `.claude/skills/` and the universal Agent Skills installation under `.agents/skills/`.
+          EOF
+
+      - name: Commit generated skills and remove this temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _vendor
+          rm -f .github/workflows/install-ui-ux-pro-max-skills-temp.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .claude/skills .agents/skills third_party/ui-ux-pro-max-skill .github/workflows/install-ui-ux-pro-max-skills-temp.yml
+          if git diff --cached --quiet; then
+            echo "No skill changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: install UI UX Pro Max agent skills"
+          git push origin HEAD:chore/install-ui-ux-pro-max-skills
