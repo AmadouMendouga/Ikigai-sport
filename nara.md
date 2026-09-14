@@ -302,3 +302,5 @@ Copier/coller ceci à l'agent chargé de reprendre :
 ## Dernière règle
 
 **Pause signifie pause.** Un autre agent peut lancer, inspecter, tester et diagnostiquer le projet en suivant ce fichier. Il ne doit reprendre les modifications de la refonte, fusionner la PR #16 ou déployer en production que lorsque l'utilisateur le demande explicitement ou que la mission confiée l'exige clairement.
+
+<!-- vercel-preview-retry: 2026-09-14T13:21:00+01:00 -->
