@@ -1,0 +1,202 @@
+[
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/ikigai-ui.css",
+    "line": 190,
+    "snippet": "transition: max-height"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1139,
+    "snippet": "cubic-bezier(.34, 1.56, .64, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1146,
+    "snippet": "cubic-bezier(.34, 1.56, .64, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1161,
+    "snippet": "cubic-bezier(.34, 1.3, .5, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1171,
+    "snippet": "cubic-bezier(.34, 1.4, .6, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1173,
+    "snippet": "cubic-bezier(.34, 1.5, .6, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1198,
+    "snippet": "cubic-bezier(.34, 1.4, .5, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1202,
+    "snippet": "cubic-bezier(.34, 1.5, .6, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1219,
+    "snippet": "cubic-bezier(.34, 1.6, .6, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1257,
+    "snippet": "cubic-bezier(.34, 1.35, .5, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1277,
+    "snippet": "cubic-bezier(.34, 1.4, .6, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1309,
+    "snippet": "cubic-bezier(.34, 1.5, .6, 1)"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1339,
+    "snippet": "cubic-bezier(.34, 1.5, .6, 1)"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1379,
+    "snippet": "transition: padding-bottom"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1447,
+    "snippet": "transition: width"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 1715,
+    "snippet": "transition: width"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 2197,
+    "snippet": "transition: padding"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 2269,
+    "snippet": "transition: padding-left"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/app/lmi.css",
+    "line": 2367,
+    "snippet": "transition: width"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/home/runner/work/Ikigai-sport/Ikigai-sport/web/components/ContainerTextFlip.tsx",
+    "line": 52,
+    "snippet": "transition: width"
+  }
+]

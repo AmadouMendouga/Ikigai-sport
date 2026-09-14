@@ -1,0 +1,94 @@
+[
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "https://ikigai-sport.naragroup.cc.cd/",
+    "line": 0,
+    "snippet": "transition: padding"
+  },
+  {
+    "antipattern": "low-contrast",
+    "name": "Low contrast text",
+    "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "https://ikigai-sport.naragroup.cc.cd/",
+    "line": 0,
+    "snippet": "1.1:1 (need 3:1) — text #162033 on #12162b"
+  },
+  {
+    "antipattern": "gpt-thin-border-wide-shadow",
+    "name": "Hairline border with wide shadow",
+    "description": "A hairline border paired with a wide, diffuse shadow is a recurring generated-UI signature. Commit to one — a defined edge or a soft elevation — rather than both at once.",
+    "severity": "advisory",
+    "category": "slop",
+    "file": "https://ikigai-sport.naragroup.cc.cd/",
+    "line": 0,
+    "snippet": "1px border + 18px shadow blur",
+    "advisory": true
+  },
+  {
+    "antipattern": "gpt-thin-border-wide-shadow",
+    "name": "Hairline border with wide shadow",
+    "description": "A hairline border paired with a wide, diffuse shadow is a recurring generated-UI signature. Commit to one — a defined edge or a soft elevation — rather than both at once.",
+    "severity": "advisory",
+    "category": "slop",
+    "file": "https://ikigai-sport.naragroup.cc.cd/",
+    "line": 0,
+    "snippet": "1px border + 18px shadow blur",
+    "advisory": true
+  },
+  {
+    "antipattern": "heading-rhythm",
+    "name": "Heading crowded against the previous block",
+    "description": "A heading binds to the content it introduces, so the rendered space above it should exceed the space below it. When headings across a page sit as close or closer to the block above than to their own content, every section reads as if it captions the previous one. Open up the space above each heading.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "https://ikigai-sport.naragroup.cc.cd/",
+    "line": 0,
+    "snippet": "h4 \"Univers\" has 0px above vs 14px below — it reads as bound to the block above (2 headings on page)"
+  },
+  {
+    "antipattern": "heading-rhythm",
+    "name": "Heading crowded against the previous block",
+    "description": "A heading binds to the content it introduces, so the rendered space above it should exceed the space below it. When headings across a page sit as close or closer to the block above than to their own content, every section reads as if it captions the previous one. Open up the space above each heading.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "https://ikigai-sport.naragroup.cc.cd/",
+    "line": 0,
+    "snippet": "h4 \"Contact\" has 0px above vs 14px below — it reads as bound to the block above (2 headings on page)"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "https://ikigai-sport.naragroup.cc.cd/",
+    "line": 0,
+    "snippet": "transition: padding-bottom"
+  },
+  {
+    "antipattern": "dark-glow",
+    "name": "Glowing shadow accents",
+    "description": "Colored glow shadows — a zero-offset chromatic halo (box- or text-shadow) on any background, or any colored blurred shadow on a dark background — are the default \"cool\" look of AI-generated UIs. Use neutral elevation shadows and subtle, purposeful lighting instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "https://ikigai-sport.naragroup.cc.cd/",
+    "line": 0,
+    "snippet": "Colored box-shadow glow (#22c55e) on dark page"
+  },
+  {
+    "antipattern": "low-contrast",
+    "name": "Low contrast text",
+    "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "https://ikigai-sport.naragroup.cc.cd/",
+    "line": 0,
+    "snippet": "pixel contrast 1.1:1 median 1.1:1 (need 4.5:1) on text shadow, opacity stack \"25 articles au catalogue — les dernières arrivées IKIGAI Sport.\""
+  }
+]
