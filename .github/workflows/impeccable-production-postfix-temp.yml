@@ -1,0 +1,61 @@
+name: Impeccable production postfix audit (temporary)
+
+on:
+  push:
+    branches:
+      - audit/impeccable-production-postfix
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Warm production
+        shell: bash
+        run: |
+          URL='https://ikigai-sport.naragroup.cc.cd/'
+          curl -L --retry 3 --retry-delay 2 --max-time 45 -sS -o /dev/null -w 'HTTP %{http_code} FINAL %{url_effective}\n' "$URL" || true
+
+      - name: Impeccable desktop production
+        shell: bash
+        run: |
+          URL='https://ikigai-sport.naragroup.cc.cd/'
+          set +e
+          npx --yes impeccable@4.1.0 detect --json --viewport 1280x800 "$URL" > /tmp/desktop.json 2> /tmp/desktop.err
+          code=$?
+          set -e
+          echo "IMPECCABLE_DESKTOP_EXIT=$code"
+          cat /tmp/desktop.json || true
+          cat /tmp/desktop.err || true
+
+      - name: Impeccable mobile production
+        shell: bash
+        run: |
+          URL='https://ikigai-sport.naragroup.cc.cd/'
+          set +e
+          npx --yes impeccable@4.1.0 detect --json --viewport 390x844 "$URL" > /tmp/mobile.json 2> /tmp/mobile.err
+          code=$?
+          set -e
+          echo "IMPECCABLE_MOBILE_EXIT=$code"
+          cat /tmp/mobile.json || true
+          cat /tmp/mobile.err || true
+
+      - name: Remove temporary workflow
+        if: always()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/impeccable-production-postfix-temp.yml
+          git add .github/workflows/impeccable-production-postfix-temp.yml
+          git commit -m "chore: remove temporary production Impeccable audit" || exit 0
+          git push
