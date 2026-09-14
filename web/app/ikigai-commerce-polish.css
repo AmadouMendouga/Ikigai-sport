@@ -1,0 +1,501 @@
+/* IKIGAI Sport — détail produit + panier
+ * Couche commerce inspirée des principes Utile/Rare UI : hiérarchie nette,
+ * feedback discret, surfaces calmes et décisions d'achat faciles à scanner.
+ * Aucun comportement de paiement, stock ou commande n'est modifié ici.
+ */
+
+.ik-app .product-detail {
+  align-items: start;
+}
+
+.ik-app .pd-media-col,
+.ik-app .pd-info {
+  min-width: 0;
+}
+
+.ik-app .pd-media {
+  overflow: hidden;
+  border: 1px solid var(--ik-line);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--surface) 78%, var(--ik-canvas));
+  box-shadow: none;
+}
+
+.ik-app .pd-media .lens-img,
+.ik-app .pd-media video {
+  background: color-mix(in srgb, var(--surface) 82%, var(--ik-canvas));
+}
+
+.ik-app .pd-media .lens-img img,
+.ik-app .pd-media > video {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+.ik-app .pd-thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  padding-block: 2px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.ik-app .pd-thumb {
+  position: relative;
+  flex: 0 0 68px;
+  width: 68px;
+  height: 68px;
+  padding: 4px;
+  overflow: hidden;
+  border: 1px solid var(--ik-line);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.ik-app .pd-thumb img,
+.ik-app .pd-thumb video {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.ik-app .pd-thumb.active,
+.ik-app .pd-thumb[aria-selected="true"] {
+  border-color: var(--ik-green);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ik-green) 18%, transparent);
+}
+
+@media (hover: hover) {
+  .ik-app .pd-thumb:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--ik-green) 34%, var(--ik-line));
+  }
+}
+
+.ik-app .pd-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ik-app .pd-title {
+  margin-bottom: 8px;
+  max-width: 20ch;
+  font-size: clamp(1.7rem, 3vw, 2.65rem);
+  line-height: 1.08;
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+
+.ik-app .pd-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+  color: var(--ik-muted);
+  font-size: .88rem;
+  font-weight: 600;
+}
+
+.ik-app .pd-price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 4px 8px;
+}
+
+.ik-app .pd-price .price-now {
+  color: var(--ik-ink);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -.035em;
+}
+
+.ik-app .pd-price .price-old {
+  color: var(--ik-muted);
+}
+
+.ik-app .discount-pill {
+  display: inline-grid;
+  place-items: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--ik-green-soft);
+  color: var(--ik-green-strong);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.ik-app .pd-desc {
+  color: var(--on-surface-variant);
+  line-height: 1.65;
+}
+
+.ik-app .pd-desc-toggle {
+  min-height: 38px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ik-green-strong);
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ik-app .pd-section {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ik-line);
+}
+
+.ik-app .pd-section > h3 {
+  margin-bottom: 10px;
+  font-size: .92rem;
+  letter-spacing: -.01em;
+}
+
+.ik-app .size-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ik-app .size-opt {
+  min-width: 48px;
+  min-height: 44px;
+  padding: 8px 13px;
+  border: 1px solid var(--ik-line);
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--ik-ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .14s ease, border-color .14s ease, background-color .14s ease, color .14s ease;
+}
+
+.ik-app .size-opt.selected,
+.ik-app .size-opt[aria-pressed="true"] {
+  border-color: var(--ik-green);
+  background: var(--ik-green);
+  color: #fff;
+}
+
+@media (hover: hover) {
+  .ik-app .size-opt:not(.selected):hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--ik-green) 38%, var(--ik-line));
+  }
+}
+
+.ik-app .qty-stepper {
+  display: inline-grid;
+  grid-template-columns: 44px minmax(46px, auto) 44px;
+  align-items: center;
+  min-height: 44px;
+  overflow: hidden;
+  border: 1px solid var(--ik-line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.ik-app .qty-stepper button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ik-ink);
+  cursor: pointer;
+}
+
+.ik-app .qty-stepper button:not(:disabled):hover {
+  background: color-mix(in srgb, var(--ik-green) 7%, var(--surface));
+}
+
+.ik-app .qty-stepper span {
+  text-align: center;
+  font-weight: 700;
+}
+
+.ik-app .pd-ctas {
+  display: grid;
+  gap: 9px;
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px solid var(--ik-line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 92%, var(--ik-canvas));
+}
+
+.ik-app .pd-ctas-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 4px;
+}
+
+.ik-app .pd-ctas-total .label {
+  color: var(--ik-muted);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.ik-app .pd-ctas-total .amount {
+  color: var(--ik-ink);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+
+.ik-app .accordion-mini {
+  overflow: clip;
+  border: 1px solid var(--ik-line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.ik-app .accordion-mini + .accordion-mini {
+  margin-top: 8px;
+}
+
+.ik-app .accordion-mini > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 10px 12px;
+  color: var(--ik-ink);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.ik-app .accordion-mini > p {
+  margin: 0;
+  padding: 0 12px 13px;
+  color: var(--ik-muted);
+  line-height: 1.55;
+}
+
+/* Panier : panneau plus lisible, sans changer le checkout ni l'idempotence. */
+.ik-app .cart-panel {
+  overflow: hidden;
+  border-color: var(--ik-line);
+}
+
+.ik-app .cart-panel-head {
+  min-height: 58px;
+  padding-inline: 16px;
+  border-bottom: 1px solid var(--ik-line);
+  background: color-mix(in srgb, var(--surface) 96%, var(--ik-canvas));
+  font-weight: 700;
+}
+
+.ik-app .cart-panel-head .count-chip {
+  display: inline-grid;
+  place-items: center;
+  min-width: 27px;
+  min-height: 27px;
+  padding-inline: 7px;
+  border-radius: 999px;
+  background: var(--ik-green-soft);
+  color: var(--ik-green-strong);
+  font-size: .76rem;
+}
+
+.ik-app .cart-panel-head .close {
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 10px;
+}
+
+.ik-app .cart-panel-items {
+  scrollbar-width: thin;
+}
+
+.ik-app .cp-item {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  gap: 11px;
+  align-items: start;
+  padding-block: 13px;
+}
+
+.ik-app .cp-item > img {
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  border: 1px solid var(--ik-line);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--surface) 78%, var(--ik-canvas));
+  object-fit: contain;
+}
+
+.ik-app .cp-cat {
+  margin-bottom: 2px;
+  color: var(--ik-muted);
+  font-size: .73rem;
+  font-weight: 600;
+}
+
+.ik-app .cp-name {
+  color: var(--ik-ink);
+  font-size: .86rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.ik-app .cp-price {
+  color: var(--ik-ink);
+  font-size: .84rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ik-app .cp-qty {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.ik-app .cp-qty button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 9px;
+}
+
+.ik-app .cp-qty span {
+  min-width: 28px;
+  text-align: center;
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.ik-app .cp-delivery {
+  margin-inline: 14px;
+  padding: 10px 11px;
+  border: 1px solid color-mix(in srgb, var(--ik-green) 20%, var(--ik-line));
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--ik-green-soft) 60%, var(--surface));
+  color: var(--on-surface-variant);
+  font-size: .78rem;
+  line-height: 1.4;
+}
+
+.ik-app .cp-subtotal {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--ik-line);
+}
+
+.ik-app .cp-subtotal .amount {
+  color: var(--ik-ink);
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.ik-app .cp-checkout {
+  min-height: 52px;
+  margin-inline: 14px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: transform .14s ease, background-color .14s ease;
+}
+
+.ik-app .cp-checkout .right {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+@media (hover: hover) {
+  .ik-app .cp-checkout:hover .right .icon {
+    transform: translateX(2px);
+  }
+}
+
+html[data-theme="dark"] .ik-app .pd-media,
+html[data-theme="dark"] .ik-app .pd-ctas,
+html[data-theme="dark"] .ik-app .accordion-mini,
+html[data-theme="dark"] .ik-app .cp-delivery {
+  background: color-mix(in srgb, var(--surface) 90%, var(--surface-container));
+}
+
+html[data-theme="dark"] .ik-app .pd-title,
+html[data-theme="dark"] .ik-app .pd-price .price-now,
+html[data-theme="dark"] .ik-app .pd-ctas-total .amount,
+html[data-theme="dark"] .ik-app .accordion-mini > summary,
+html[data-theme="dark"] .ik-app .cp-name,
+html[data-theme="dark"] .ik-app .cp-price,
+html[data-theme="dark"] .ik-app .cp-subtotal .amount {
+  color: var(--on-surface);
+}
+
+@media (min-width: 961px) {
+  .ik-app .pd-media-col {
+    position: sticky;
+    top: 96px;
+    align-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .ik-app .pd-media {
+    border-radius: 16px;
+  }
+
+  .ik-app .pd-title {
+    max-width: none;
+    font-size: clamp(1.55rem, 7vw, 2rem);
+  }
+
+  .ik-app .pd-ctas {
+    padding: 11px;
+    border-radius: 14px;
+  }
+
+  .ik-app .cp-item {
+    grid-template-columns: 54px minmax(0, 1fr) auto;
+    gap: 9px;
+  }
+
+  .ik-app .cp-item > img {
+    width: 54px;
+    height: 54px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ik-app .pd-thumb,
+  .ik-app .size-opt,
+  .ik-app .cp-checkout,
+  .ik-app .cp-checkout .right .icon {
+    transition: none;
+  }
+
+  .ik-app .pd-thumb:hover,
+  .ik-app .size-opt:hover,
+  .ik-app .cp-checkout:hover .right .icon {
+    transform: none;
+  }
+}

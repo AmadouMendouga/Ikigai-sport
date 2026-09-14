@@ -1,0 +1,606 @@
+/* IKIGAI Sport — compte, commandes et livraison
+ * Couche visuelle V2 basée sur les références Utile : hiérarchie claire,
+ * surfaces calmes, peu d'effets, accent vert réservé aux actions/états utiles.
+ * Aucune logique de commande, suivi GPS, QR ou paiement n'est modifiée ici.
+ */
+
+/* Espace client */
+.ik-app .ik-account-header,
+.ik-app .ik-profile-identity,
+.ik-app .ik-profile-group-card,
+.ik-app .ik-order-card,
+.ik-app .ik-order-state,
+.ik-app .ik-remise-ticket,
+.ik-app .ik-help-card {
+  border-color: var(--ik-line);
+  box-shadow: none;
+}
+
+.ik-app .ik-account-header {
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--ik-line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 94%, var(--ik-canvas));
+}
+
+.ik-app .ik-welcome-person {
+  min-width: 0;
+}
+
+.ik-app .ik-welcome-person small {
+  color: var(--ik-muted);
+  font-size: .75rem;
+  font-weight: 500;
+}
+
+.ik-app .ik-welcome-person strong {
+  display: block;
+  max-width: 36ch;
+  overflow: hidden;
+  color: var(--ik-ink);
+  font-size: .92rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ik-app .ik-avatar,
+.ik-app .ik-profile-avatar,
+.ik-app .ik-order-parcel {
+  background: var(--ik-green-soft);
+  color: var(--ik-green-strong);
+  box-shadow: none;
+}
+
+.ik-app .ik-account-page-title {
+  margin-bottom: 22px;
+}
+
+.ik-app .ik-account-page-title h1,
+.ik-app .ik-order-detail-top h1 {
+  color: var(--ik-ink);
+  letter-spacing: -.045em;
+}
+
+.ik-app .ik-profile-identity {
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.ik-app .ik-profile-avatar {
+  width: 58px;
+  height: 58px;
+  flex-basis: 58px;
+  border-radius: 16px;
+  font-weight: 700;
+}
+
+.ik-app .ik-profile-identity h2 {
+  color: var(--ik-ink);
+  font-size: 1.05rem;
+  letter-spacing: -.02em;
+}
+
+.ik-app .ik-profile-group {
+  margin-bottom: 22px;
+}
+
+.ik-app .ik-profile-group > h2 {
+  margin: 0 0 9px 2px;
+  color: var(--ik-muted);
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.ik-app .ik-profile-group-card {
+  overflow: hidden;
+  border: 1px solid var(--ik-line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.ik-app .ik-profile-group-card > * + * {
+  border-top-color: var(--ik-line);
+}
+
+.ik-app .ik-profile-row {
+  gap: 12px;
+  min-height: 68px;
+  padding: 16px;
+  transition: background-color .15s ease;
+}
+
+.ik-app .ik-profile-row > .icon:first-child {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 9px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--ik-green-soft) 72%, var(--surface));
+  color: var(--ik-green-strong);
+}
+
+.ik-app .ik-profile-row > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.ik-app .ik-profile-row strong {
+  color: var(--ik-ink);
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.ik-app .ik-profile-row small {
+  display: block;
+  margin-top: 2px;
+  color: var(--ik-muted);
+  font-size: .76rem;
+  line-height: 1.35;
+}
+
+@media (hover: hover) {
+  .ik-app a.ik-profile-row:hover,
+  .ik-app details > summary.ik-profile-row:hover {
+    background: color-mix(in srgb, var(--ik-green) 5%, var(--surface));
+  }
+}
+
+.ik-app .ik-profile-form {
+  padding: 4px 16px 18px;
+}
+
+.ik-app .ik-profile-form label {
+  margin-top: 10px;
+  color: var(--ik-ink);
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.ik-app .ik-profile-form input,
+.ik-app .ik-profile-form textarea {
+  border-color: var(--ik-line);
+  background: color-mix(in srgb, var(--surface) 94%, var(--ik-canvas));
+  box-shadow: none;
+}
+
+.ik-app .ik-theme-choice {
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--ik-line);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--surface) 90%, var(--ik-canvas));
+}
+
+.ik-app .ik-theme-choice button {
+  min-height: 38px;
+  border-radius: 8px;
+}
+
+.ik-app .ik-theme-choice button[aria-pressed="true"] {
+  background: var(--ik-ink);
+  color: var(--surface);
+}
+
+.ik-app .ik-profile-logout {
+  min-height: 48px;
+  border-radius: 12px;
+  border-color: color-mix(in srgb, var(--ik-danger) 24%, var(--ik-line));
+  background: var(--surface);
+  color: var(--ik-danger);
+}
+
+/* Liste de commandes */
+.ik-app .ik-orders-toolbar {
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ik-app .ik-order-tabs {
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid var(--ik-line);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface) 90%, var(--ik-canvas));
+}
+
+.ik-app .ik-order-tabs button {
+  min-height: 42px;
+  border-radius: 9px;
+  color: var(--ik-muted);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.ik-app .ik-order-tabs button[aria-selected="true"] {
+  background: var(--ik-ink);
+  color: var(--surface);
+}
+
+.ik-app .ik-order-tabs button span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  min-height: 22px;
+  margin-left: 5px;
+  padding-inline: 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  font-size: .7rem;
+}
+
+.ik-app .ik-order-list {
+  gap: 12px;
+}
+
+.ik-app .ik-order-card {
+  padding: 18px;
+  border: 1px solid var(--ik-line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.ik-app .ik-order-card-head {
+  gap: 10px;
+}
+
+.ik-app .ik-order-parcel {
+  width: 42px;
+  height: 42px;
+  flex-basis: 42px;
+  border-radius: 12px;
+}
+
+.ik-app .ik-order-card-head > div > strong {
+  color: var(--ik-ink);
+  font-size: .86rem;
+}
+
+.ik-app .ik-order-card-head > div > p {
+  margin: 1px 0 0;
+  color: var(--ik-muted);
+  font-size: .73rem;
+}
+
+.ik-app .ik-order-badge {
+  min-height: 28px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.ik-app .ik-order-summary {
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ik-line);
+}
+
+.ik-app .ik-order-summary h2 {
+  color: var(--ik-ink);
+  font-size: .96rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ik-app .ik-order-summary > strong {
+  color: var(--ik-ink);
+  font-size: 1rem;
+  letter-spacing: -.02em;
+}
+
+.ik-app .ik-order-detail-link {
+  min-height: 44px;
+  margin-top: 12px;
+  border-top: 1px solid var(--ik-line);
+  color: var(--ik-green-strong);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+/* Détail et timeline */
+.ik-app .ik-order-detail-top {
+  margin-bottom: 6px;
+}
+
+.ik-app .ik-order-sync {
+  color: var(--ik-muted);
+  font-size: .75rem;
+}
+
+.ik-app .ik-order-state {
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--ik-green) 20%, var(--ik-line));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--ik-green-soft) 54%, var(--surface));
+}
+
+.ik-app .ik-order-state h2 {
+  margin-bottom: 4px;
+  color: var(--ik-ink);
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  letter-spacing: -.03em;
+}
+
+.ik-app .ik-order-state p {
+  margin: 0;
+  color: var(--on-surface-variant);
+  line-height: 1.55;
+}
+
+.ik-app .ik-order-detail-grid {
+  gap: 16px;
+}
+
+.ik-app .ik-section-label {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ik-line);
+}
+
+.ik-app .ik-section-label h2 {
+  color: var(--ik-ink);
+  font-size: .98rem;
+}
+
+.ik-app .ik-order-timeline {
+  margin-block: 16px;
+}
+
+.ik-app .ik-order-timeline li {
+  min-height: 64px;
+}
+
+.ik-app .ik-timeline-dot {
+  border-color: var(--ik-line);
+  background: var(--surface);
+}
+
+.ik-app .ik-order-timeline .is-complete .ik-timeline-dot,
+.ik-app .ik-order-timeline .is-current .ik-timeline-dot {
+  border-color: var(--ik-green);
+  background: var(--ik-green);
+  color: #fff;
+}
+
+.ik-app .ik-order-timeline li > div > strong {
+  color: var(--ik-ink);
+  font-size: .86rem;
+}
+
+.ik-app .ik-order-timeline li > div > p,
+.ik-app .ik-order-timeline li > div > time {
+  color: var(--ik-muted);
+  font-size: .75rem;
+}
+
+.ik-app .ik-remise-ticket,
+.ik-app .ik-help-card {
+  border: 1px solid var(--ik-line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.ik-app .ik-ticket-code {
+  color: var(--ik-ink);
+  letter-spacing: .18em;
+}
+
+/* Suivi livraison : la carte reste dominante, la feuille inférieure devient
+   une surface fonctionnelle et non décorative. */
+.ik-app.dlv-screen {
+  background: color-mix(in srgb, var(--surface-container) 90%, var(--ik-canvas));
+}
+
+.ik-app .ik-tracking-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--ik-line) 78%, transparent);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(12px) saturate(125%);
+}
+
+.ik-app .ik-tracking-header > div span {
+  color: var(--ik-green-strong);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.ik-app .ik-tracking-header h1 {
+  color: var(--ik-ink);
+  font-size: 1rem;
+  letter-spacing: -.02em;
+}
+
+.ik-app .dlv-sheet {
+  border-top: 1px solid var(--ik-line);
+  background: color-mix(in srgb, var(--surface) 96%, var(--ik-canvas));
+  box-shadow: 0 -12px 40px rgb(15 23 42 / 8%);
+}
+
+.ik-app .dlv-info-card,
+.ik-app .ik-delivery-ticket,
+.ik-app .ik-code-form {
+  border: 1px solid var(--ik-line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.ik-app .dlv-avatar {
+  background: var(--ik-green-soft);
+  color: var(--ik-green-strong);
+}
+
+.ik-app .dlv-icon-circle {
+  border: 1px solid var(--ik-line);
+  background: var(--surface);
+  color: var(--ik-ink);
+  box-shadow: none;
+}
+
+.ik-app .dlv-icon-circle.whatsapp {
+  border-color: color-mix(in srgb, var(--ik-green) 28%, var(--ik-line));
+  background: var(--ik-green-soft);
+  color: var(--ik-green-strong);
+}
+
+.ik-app .dlv-stepper {
+  padding-inline: 2px;
+}
+
+.ik-app .dlv-step .dot {
+  box-shadow: none;
+}
+
+.ik-app .dlv-step.done .dot,
+.ik-app .dlv-step.current .dot,
+.ik-app .dlv-step-line.done {
+  background: var(--ik-green);
+}
+
+.ik-app .dlv-step .label {
+  color: var(--ik-muted);
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.ik-app .dlv-step.current .label {
+  color: var(--ik-ink);
+}
+
+.ik-app .dlv-live-badge,
+.ik-app .dlv-route-stats,
+.ik-app .dlv-navigation-hud,
+.ik-app .dlv-map-tools,
+.ik-app .dlv-recenter {
+  border: 1px solid color-mix(in srgb, var(--ik-line) 78%, transparent);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 10%);
+  backdrop-filter: blur(10px) saturate(120%);
+}
+
+.ik-app .dlv-route-warning {
+  border: 1px solid color-mix(in srgb, var(--ik-warning) 22%, transparent);
+  border-radius: 12px;
+  background: var(--ik-warning-soft);
+  color: var(--ik-warning);
+}
+
+.ik-app .dlv-scan video,
+.ik-app .dlv-code-qr {
+  border: 1px solid var(--ik-line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+html[data-theme="dark"] .ik-app .ik-account-header,
+html[data-theme="dark"] .ik-app .ik-profile-identity,
+html[data-theme="dark"] .ik-app .ik-profile-group-card,
+html[data-theme="dark"] .ik-app .ik-order-card,
+html[data-theme="dark"] .ik-app .ik-order-state,
+html[data-theme="dark"] .ik-app .ik-remise-ticket,
+html[data-theme="dark"] .ik-app .ik-help-card,
+html[data-theme="dark"] .ik-app .dlv-sheet,
+html[data-theme="dark"] .ik-app .dlv-info-card,
+html[data-theme="dark"] .ik-app .ik-delivery-ticket,
+html[data-theme="dark"] .ik-app .ik-code-form {
+  background: color-mix(in srgb, var(--surface) 92%, var(--surface-container));
+}
+
+html[data-theme="dark"] .ik-app .ik-welcome-person strong,
+html[data-theme="dark"] .ik-app .ik-account-page-title h1,
+html[data-theme="dark"] .ik-app .ik-profile-identity h2,
+html[data-theme="dark"] .ik-app .ik-profile-row strong,
+html[data-theme="dark"] .ik-app .ik-order-summary h2,
+html[data-theme="dark"] .ik-app .ik-order-summary > strong,
+html[data-theme="dark"] .ik-app .ik-order-state h2,
+html[data-theme="dark"] .ik-app .ik-section-label h2,
+html[data-theme="dark"] .ik-app .ik-order-timeline li > div > strong,
+html[data-theme="dark"] .ik-app .ik-ticket-code,
+html[data-theme="dark"] .ik-app .ik-tracking-header h1 {
+  color: var(--on-surface);
+}
+
+@media (max-width: 760px) {
+  .ik-app .ik-account-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ik-app .ik-account-header .btn {
+    width: 100%;
+  }
+
+  .ik-app .ik-profile-identity {
+    padding: 15px;
+  }
+
+  .ik-app .ik-profile-row {
+    min-height: 64px;
+    padding: 14px;
+  }
+
+  .ik-app .ik-theme-choice {
+    width: 100%;
+    margin-left: 50px;
+  }
+
+  .ik-app .ik-theme-choice button {
+    flex: 1;
+  }
+
+  .ik-app .ik-orders-toolbar {
+    align-items: stretch;
+  }
+
+  .ik-app .ik-order-tabs {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .ik-app .ik-order-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ik-app .ik-order-tabs button {
+    flex: 0 0 auto;
+    min-width: 108px;
+  }
+
+  .ik-app .ik-order-card {
+    padding: 15px;
+  }
+
+  .ik-app .ik-order-card-head {
+    align-items: flex-start;
+  }
+
+  .ik-app .ik-order-badge {
+    margin-left: 52px;
+  }
+
+  .ik-app .ik-order-summary {
+    display: block;
+  }
+
+  .ik-app .ik-order-summary > strong {
+    display: block;
+    margin-top: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ik-app .ik-profile-row,
+  .ik-app .ik-order-tabs button {
+    transition: none;
+  }
+}

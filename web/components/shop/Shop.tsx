@@ -4,12 +4,8 @@
 // client sur le catalogue déjà chargé (pas besoin de requêtes
 // supplémentaires). L'état initial vient des paramètres d'URL comme
 // l'original (?league=, ?promo=1, ?stock=1, ?tri=, ?q=), lus une seule fois
-// au montage (pas via useSearchParams()/Suspense : sur une page par ailleurs
-// statique, ça obligeait soit un flash de contenu vide au premier rendu
-// serveur, soit un rendu dupliqué observé en dev — un effet au montage évite
-// les deux, au prix d'un correctif de quelques millisecondes après affichage
-// si l'URL contenait des paramètres). Jamais réécrit dans l'URL ensuite —
-// comportement identique à l'original.
+// au montage. Les interactions restent locales afin de ne pas toucher aux
+// flux métier, au panier ou aux API.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/icons/Icon";
 import { ProductCard } from "@/components/products/ProductCard";
@@ -20,10 +16,6 @@ const PER_PAGE = 12;
 
 type SortOrder = "default" | "price-asc" | "price-desc";
 
-// `products`/`leagues` sont déjà scopés au sport courant par la page appelante
-// (app/[sport]/boutique/page.tsx) — plus de filtre Sport ici depuis le pivot
-// portail : chaque sport a son propre site, le sport n'est plus un simple
-// filtre à côté des autres (voir le plan "portail multi-sports").
 export function Shop({
   products,
   leagues,
@@ -42,26 +34,14 @@ export function Shop({
   const [searchInput, setSearchInput] = useState("");
   const [sort, setSort] = useState<SortOrder>("default");
   const [page, setPage] = useState(1);
-  const filtersRef = useRef<HTMLDetailsElement>(null);
-
-  // Replié par défaut sur mobile : ouvert en dur (`open`) pour que le panneau
-  // reste visible sans JS sur la colonne latérale desktop (`.filters`, fixe,
-  // pas de bouton pour le refermer — voir lmi.css §Boutique). Sur mobile il
-  // devient un <details> repliable (lmi.css, @media max-width: 940px) mais
-  // s'ouvrait quand même en grand par défaut, doublonnant la rangée de
-  // pastilles juste en dessous avant même d'arriver aux produits.
-  useEffect(() => {
-    if (filtersRef.current && window.matchMedia("(max-width: 940px)").matches) {
-      filtersRef.current.open = false;
-    }
-  }, []);
+  const filtersPanelRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const league = params.get("league");
     const q = params.get("q") || "";
     const tri = params.get("tri");
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- lit l'URL au montage, pas possible pendant le rendu serveur
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture unique de l'URL au montage
     if (league) setSelectedLeagues([league]);
     if (verified && params.get("promo") === "1") setOnlyPromo(true);
     if (verified && params.get("stock") === "1") setInStockOnly(true);
@@ -72,6 +52,25 @@ export function Shop({
     if (tri === "prix-asc") setSort("price-asc");
     else if (tri === "prix-desc") setSort("price-desc");
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 901px)");
+    const sync = (event?: MediaQueryListEvent) => {
+      const panel = filtersPanelRef.current;
+      if (!panel) return;
+      if (event ? event.matches : desktop.matches) {
+        panel.open = true;
+      } else {
+        // En mobile, les filtres commencent repliés afin de laisser les
+        // produits visibles immédiatement. L'utilisateur garde ensuite le
+        // contrôle du panneau tant que le breakpoint ne change pas.
+        panel.removeAttribute("open");
+      }
+    };
+    sync();
+    desktop.addEventListener("change", sync);
+    return () => desktop.removeEventListener("change", sync);
   }, []);
 
   const filtered = useMemo(() => {
@@ -92,9 +91,25 @@ export function Shop({
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const currentPage = Math.min(page, totalPages);
   const pageItems = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+  const activeFilterCount = selectedLeagues.length + (onlyPromo ? 1 : 0) + (inStockOnly ? 1 : 0) + (search ? 1 : 0);
 
   function toggleLeague(key: string, checked: boolean) {
     setSelectedLeagues((prev) => (checked ? [...prev, key] : prev.filter((k) => k !== key)));
+    setPage(1);
+  }
+
+  function clearSearch() {
+    setSearch("");
+    setSearchInput("");
+    setPage(1);
+  }
+
+  function resetFilters() {
+    setSelectedLeagues([]);
+    setOnlyPromo(false);
+    setInStockOnly(false);
+    clearSearch();
+    setSort("default");
     setPage(1);
   }
 
@@ -106,10 +121,13 @@ export function Shop({
   return (
     <div className="shop-layout">
       <aside id="catalogFilters" className="filters" aria-label="Filtres du catalogue">
-        <details ref={filtersRef} className="filters-panel" open>
+        <details ref={filtersPanelRef} className="filters-panel">
           <summary>
-            <Icon name="tune" size="sm" />
-            Filtrer les produits
+            <span className="filters-summary-label">
+              <Icon name="tune" size="sm" />
+              Filtrer les produits
+            </span>
+            {activeFilterCount > 0 && <span className="filters-count" aria-label={`${activeFilterCount} filtres actifs`}>{activeFilterCount}</span>}
           </summary>
           <div className="filters-content">
             {leagues.length > 0 ? (
@@ -125,7 +143,7 @@ export function Shop({
                           checked={selectedLeagues.includes(league.key)}
                           onChange={(e) => toggleLeague(league.key, e.currentTarget.checked)}
                         />
-                        {league.label}
+                        <span>{league.label}</span>
                         <span className="count">{count}</span>
                       </label>
                     );
@@ -147,7 +165,7 @@ export function Shop({
                         setPage(1);
                       }}
                     />
-                    En promotion
+                    <span>En promotion</span>
                   </label>
                   <label className="filter-option">
                     <input
@@ -158,26 +176,42 @@ export function Shop({
                         setPage(1);
                       }}
                     />
-                    En stock uniquement
+                    <span>En stock uniquement</span>
                   </label>
                 </div>
               </div>
             )}
 
+            {activeFilterCount > 0 && (
+              <button type="button" className="shop-reset-btn" onClick={resetFilters}>
+                <Icon name="refresh" size="sm" />
+                Réinitialiser les filtres
+              </button>
+            )}
+
             <a className="btn btn-tonal btn-block" href={`https://wa.me/${settings.whatsapp}`} target="_blank" rel="noopener">
               <Icon name="whatsapp" size="sm" />
-              Une question ?
+              Besoin d&apos;aide ?
             </a>
           </div>
         </details>
       </aside>
 
-      <div>
+      <div className="shop-content">
+        <div className="shop-content-heading">
+          <div>
+            <span className="shop-eyebrow">Catalogue</span>
+            <h2>Choisissez votre équipement</h2>
+          </div>
+          <span className="shop-total-badge">{products.length} article{products.length !== 1 ? "s" : ""}</span>
+        </div>
+
         {leagues.length > 0 && (
           <div className="category-pills" role="group" aria-label="Filtrer par championnat">
             <button
               type="button"
               className={"category-pill" + (selectedLeagues.length === 0 ? " active" : "")}
+              aria-pressed={selectedLeagues.length === 0}
               onClick={() => {
                 setSelectedLeagues([]);
                 setPage(1);
@@ -201,6 +235,42 @@ export function Shop({
                 </button>
               );
             })}
+          </div>
+        )}
+
+        {activeFilterCount > 0 && (
+          <div className="active-filters" aria-label="Filtres actifs">
+            <span className="active-filters-label">Filtres actifs</span>
+            <div className="active-filter-chips">
+              {selectedLeagues.map((key) => {
+                const league = leagues.find((item) => item.key === key);
+                return (
+                  <button key={key} type="button" className="active-filter-chip" onClick={() => toggleLeague(key, false)}>
+                    {league?.label || key}
+                    <Icon name="close" size="sm" />
+                  </button>
+                );
+              })}
+              {onlyPromo && (
+                <button type="button" className="active-filter-chip" onClick={() => { setOnlyPromo(false); setPage(1); }}>
+                  Promotions
+                  <Icon name="close" size="sm" />
+                </button>
+              )}
+              {inStockOnly && (
+                <button type="button" className="active-filter-chip" onClick={() => { setInStockOnly(false); setPage(1); }}>
+                  En stock
+                  <Icon name="close" size="sm" />
+                </button>
+              )}
+              {search && (
+                <button type="button" className="active-filter-chip" onClick={clearSearch}>
+                  « {searchInput.trim()} »
+                  <Icon name="close" size="sm" />
+                </button>
+              )}
+            </div>
+            <button type="button" className="active-filters-clear" onClick={resetFilters}>Tout effacer</button>
           </div>
         )}
 
@@ -229,7 +299,7 @@ export function Shop({
             {filtered.length} produit{filtered.length !== 1 ? "s" : ""} trouvé{filtered.length !== 1 ? "s" : ""}
           </span>
           <div className="toolbar-controls">
-            <span className="field-wrap">
+            <span className="field-wrap shop-search-wrap">
               <Icon name="search" />
               <label className="sr-only" htmlFor="shopSearch">
                 Rechercher une équipe ou un produit
@@ -238,7 +308,7 @@ export function Shop({
                 type="search"
                 className="search-input"
                 id="shopSearch"
-                placeholder="Rechercher une équipe..."
+                placeholder="Produit ou équipe..."
                 value={searchInput}
                 onChange={(e) => {
                   setSearchInput(e.currentTarget.value);
@@ -246,31 +316,33 @@ export function Shop({
                   setPage(1);
                 }}
               />
+              {searchInput && (
+                <button type="button" className="shop-search-clear" aria-label="Effacer la recherche" onClick={clearSearch}>
+                  <Icon name="close" size="sm" />
+                </button>
+              )}
             </span>
             <select
               className="sort-select"
-              aria-label="Trier"
+              aria-label="Trier les produits"
               value={sort}
               onChange={(e) => setSort(e.currentTarget.value as SortOrder)}
             >
-              <option value="default">Ordre du catalogue</option>
-              <option value="price-asc">Prix croissant</option>
-              <option value="price-desc">Prix décroissant</option>
+              <option value="default">Pertinence</option>
+              <option value="price-asc">Prix : croissant</option>
+              <option value="price-desc">Prix : décroissant</option>
             </select>
           </div>
         </div>
 
-        {/* visuellement masqué : comble le niveau h2 manquant entre le h1 de la
-            page et les h3 des cartes produit (plan du document pour lecteurs d'écran) */}
-        <h2 className="sr-only">Résultats</h2>
-        <div className="product-grid" id="shopGrid">
+        <div className="product-grid" id="shopGrid" aria-label="Résultats du catalogue">
           {pageItems.length ? (
             pageItems.map((p) => <ProductCard key={p.slug} product={p} settings={settings} />)
           ) : (
             <div className="empty-state">
               <Icon name="search" />
               <div>
-                Aucun produit ne correspond à votre recherche.
+                <strong>Aucun produit trouvé.</strong>
                 <br />
                 Essayez d&apos;autres filtres ou écrivez-nous sur WhatsApp.
               </div>

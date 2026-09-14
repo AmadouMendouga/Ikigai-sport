@@ -1,0 +1,158 @@
+/* IKIGAI Sport — correctifs finaux V2
+ * Contraste, cohérence typographique et espace livreur.
+ * Cette couche reste purement visuelle.
+ */
+
+/* IBM Plex Sans est auto-hébergée en 400/500/600/700 : éviter la synthèse
+   de graisses intermédiaires non fournies par la police. */
+.ik-app .accordion-mini > summary,
+.ik-app .cp-name {
+  font-weight: 600;
+}
+
+/* Le vert #22C55E est un excellent accent, mais le blanc dessus n'atteint pas
+   un contraste suffisant pour du petit texte. On réutilise le rôle on-primary
+   sombre déjà présent dans le design system. */
+.ik-app .btn-primary,
+.ik-app .cp-checkout,
+.ik-app .size-opt.selected,
+.ik-app .size-opt[aria-pressed="true"],
+.ik-app .pagination button.active,
+.ik-app .pagination button[aria-current="page"] {
+  color: var(--on-primary);
+}
+
+/* Les contrôles actifs neutres doivent rester lisibles en thème sombre. */
+html[data-theme="dark"] .ik-app .ik-theme-choice button[aria-pressed="true"],
+html[data-theme="dark"] .ik-app .ik-order-tabs button[aria-selected="true"],
+html[data-theme="dark"] .ik-app .category-pill.active,
+html[data-theme="dark"] .ik-app .filter-chip.active,
+html[data-theme="dark"] .ik-app .chip.active {
+  border-color: var(--primary);
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+/* Inscription livreur : une carte sobre, lisible et mobile-first. */
+.ik-app .ik-courier-register-card {
+  max-width: 620px;
+  margin-inline: auto;
+  padding: 22px;
+  border: 1px solid var(--ik-line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.ik-app .ik-courier-register-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ik-app .ik-courier-register-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 13px;
+  background: var(--ik-green-soft);
+  color: var(--ik-green-strong);
+}
+
+.ik-app .ik-courier-register-heading h3 {
+  margin: 2px 0 0;
+  color: var(--ik-ink);
+  font-size: 1.2rem;
+  letter-spacing: -.025em;
+}
+
+.ik-app .ik-courier-register-intro {
+  margin: -6px 0 18px;
+  color: var(--ik-muted);
+  line-height: 1.55;
+}
+
+.ik-app .ik-courier-register-card .form-row {
+  margin-bottom: 14px;
+}
+
+.ik-app .ik-courier-register-card .form-row label {
+  color: var(--ik-ink);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.ik-app .ik-courier-register-card input {
+  width: 100%;
+  border-color: var(--ik-line);
+  background: color-mix(in srgb, var(--surface) 94%, var(--ik-canvas));
+}
+
+.ik-app .ik-courier-register-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.ik-app .ik-courier-register-actions .btn {
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  text-align: center;
+}
+
+.ik-app .ik-courier-access-link {
+  font-size: .82rem;
+}
+
+.ik-app .ik-courier-register-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 10px 11px;
+  border: 1px solid color-mix(in srgb, var(--ik-green) 20%, var(--ik-line));
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--ik-green-soft) 60%, var(--surface));
+  color: var(--on-surface-variant);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.ik-app .ik-courier-register-error {
+  margin: 0 0 14px;
+  padding: 10px 11px;
+  border: 1px solid color-mix(in srgb, var(--ik-danger) 22%, transparent);
+  border-radius: 11px;
+  background: var(--ik-danger-soft);
+  color: var(--ik-danger);
+  font-size: .8rem;
+}
+
+html[data-theme="dark"] .ik-app .ik-courier-register-card {
+  background: color-mix(in srgb, var(--surface) 92%, var(--surface-container));
+}
+
+html[data-theme="dark"] .ik-app .ik-courier-register-heading h3,
+html[data-theme="dark"] .ik-app .ik-courier-register-card .form-row label {
+  color: var(--on-surface);
+}
+
+html[data-theme="dark"] .ik-app .ik-courier-register-note {
+  background: color-mix(in srgb, var(--primary-container) 54%, var(--surface));
+}
+
+@media (max-width: 560px) {
+  .ik-app .ik-courier-register-card {
+    padding: 16px;
+    border-radius: 15px;
+  }
+
+  .ik-app .ik-courier-register-actions {
+    grid-template-columns: 1fr;
+  }
+}
