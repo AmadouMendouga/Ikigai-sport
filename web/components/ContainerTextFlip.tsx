@@ -1,19 +1,20 @@
 "use client";
 
-// Container Text Flip — porté depuis js/container-text-flip.js. Valeurs par
-// défaut du composant Aceternity conservées : intervalle 3000ms, largeur
-// animée en 700ms ease-in-out (mesurée via scrollWidth + 30px), lettres en
-// fondu-flou décalées de 20ms chacune.
+// Container Text Flip — porté depuis js/container-text-flip.js. L'intervalle
+// reste configurable ; la largeur suit désormais directement le mot mesuré
+// pour éviter une animation de layout coûteuse. Les lettres gardent leur
+// fondu-flou décalé, sauf si l'utilisateur préfère réduire les animations.
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export interface ContainerTextFlipProps {
   words: string[];
   interval?: number;
+  /** Conservé pour compatibilité avec les appels existants ; la largeur n'est plus animée. */
   duration?: number;
 }
 
-export function ContainerTextFlip({ words, interval = 3000, duration = 700 }: ContainerTextFlipProps) {
+export function ContainerTextFlip({ words, interval = 3000 }: ContainerTextFlipProps) {
   const [index, setIndex] = useState(0);
   const [width, setWidth] = useState<number>();
   const reduce = useReducedMotion();
@@ -47,10 +48,7 @@ export function ContainerTextFlip({ words, interval = 3000, duration = 700 }: Co
   if (!words.length) return null;
 
   return (
-    <span
-      className="ctf-pill"
-      style={{ width }}
-    >
+    <span className="ctf-pill" style={{ width }}>
       <span className="ctf-text" key={index}>
         {Array.from(word).map((ch, idx) => (
           <span
