@@ -156,3 +156,23 @@ html[data-theme="dark"] .ik-app .ik-courier-register-note {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Impeccable 4.1 — contraste du hero et surfaces sans effet IA. */
+.ik-app .portal-hero-scrim::after {
+  background: linear-gradient(90deg, rgb(0 0 0 / 68%) 0%, rgb(0 0 0 / 28%) 58%, transparent 88%);
+}
+
+.ik-app .portal-hero-content h1,
+.ik-app .portal-hero-content h2,
+.ik-app .portal-hero-content p {
+  color: #fff;
+  text-shadow: none;
+}
+
+.ik-app .portal-hero-content p { opacity: 1; }
+
+.ik-app .footer-grid > div:not(.footer-brand) h4 {
+  margin-top: 16px;
+  margin-bottom: 10px;
+}

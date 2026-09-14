@@ -49,7 +49,7 @@ export function ContainerTextFlip({ words, interval = 3000, duration = 700 }: Co
   return (
     <span
       className="ctf-pill"
-      style={{ width, transition: reduce ? "none" : `width ${duration}ms ease-in-out` }}
+      style={{ width }}
     >
       <span className="ctf-text" key={index}>
         {Array.from(word).map((ch, idx) => (
