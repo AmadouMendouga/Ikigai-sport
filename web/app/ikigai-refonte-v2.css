@@ -429,7 +429,7 @@
 
 /* Dark mode : jamais de noir pur, plusieurs niveaux de surface. */
 @media (prefers-color-scheme: dark) {
-  .ik-app:not([data-theme="light"]) {
+  html:not([data-theme="light"]) .ik-app {
     --ik-canvas: #10151d;
     --ik-card: #171e28;
     --ik-ink: #eef3f8;
@@ -441,7 +441,7 @@
   }
 }
 
-.ik-app[data-theme="dark"] {
+html[data-theme="dark"] .ik-app {
   --ik-canvas: #10151d;
   --ik-card: #171e28;
   --ik-ink: #eef3f8;
