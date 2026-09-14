@@ -45,5 +45,8 @@
     "firebase-tools": "^15.28.2",
     "playwright": "1.62.1",
     "typescript": "^5"
+  },
+  "overrides": {
+    "jose": "4.15.9"
   }
 }
