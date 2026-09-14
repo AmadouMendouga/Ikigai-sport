@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
 import "./lmi.css";
 import "./ikigai-ui.css";
 import "./ikigai-ux-polish.css";
+import "./ikigai-refonte-v2.css";
+import "./ikigai-refonte-v2-components.css";
+import "./ikigai-rareui-polish.css";
+import "./ikigai-commerce-polish.css";
+import "./ikigai-journey-polish.css";
+import "./ikigai-refonte-v2-finalize.css";
 import { IconSprite } from "@/components/icons/IconSprite";
 import { ToastHost } from "@/components/Toast";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "IKIGAI Sport",

@@ -1,0 +1,211 @@
+/* IKIGAI Sport — Refonte V2 / composants réels
+ * Ajustements ciblés sur les classes réellement utilisées dans web/.
+ * Inspiré des références utilisateur : cohérence, hiérarchie, neutres teintés,
+ * icônes homogènes et absence de décor non fonctionnel.
+ */
+
+/* Palette locale compatible clair/sombre. */
+.ik-app {
+  --ik-ink: #162033;
+  --ik-muted: #667085;
+  --ik-canvas: #f7f9fc;
+  --ik-card: #fcfdfd;
+  --ik-line: #e7ebf0;
+}
+
+html[data-theme="dark"] .ik-app {
+  --ik-ink: #edf2f7;
+  --ik-muted: #aab6c8;
+  --ik-canvas: #12182a;
+  --ik-card: #182039;
+  --ik-line: #33405d;
+  --ik-green-soft: #163523;
+  --ik-danger-soft: #3a2027;
+  --ik-warning-soft: #3a2b16;
+}
+
+/* Header réel : topbar + coque de navigation. */
+.ik-app .topbar {
+  background: color-mix(in srgb, var(--ik-canvas) 88%, var(--surface));
+  color: var(--ik-muted);
+  border-bottom: 1px solid var(--ik-line);
+}
+
+.ik-app .am-wrap {
+  background: color-mix(in srgb, var(--surface) 96%, var(--ik-canvas));
+  border-bottom: 1px solid var(--ik-line);
+}
+
+.ik-app .am-shell {
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+.ik-app .am-nav {
+  min-height: 72px;
+  gap: 20px;
+}
+
+.ik-app .logo {
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.ik-app .logo-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--ik-green-soft);
+  color: var(--ik-green-strong);
+}
+
+.ik-app .header-actions {
+  gap: 6px;
+  align-items: center;
+}
+
+.ik-app .header-actions .icon-btn.plain,
+.ik-app .header-actions .cart-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--on-surface-variant);
+  box-shadow: none;
+}
+
+.ik-app .header-actions .icon-btn.plain:hover,
+.ik-app .header-actions .cart-btn:hover {
+  background: var(--surface-container-low);
+  border-color: var(--ik-line);
+  color: var(--ik-ink);
+}
+
+.ik-app .header-actions .cart-btn {
+  position: relative;
+}
+
+.ik-app .header-actions .cart-count {
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  min-width: 19px;
+  height: 19px;
+  padding-inline: 5px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 2px solid var(--surface);
+  background: var(--ik-green);
+  color: #fff;
+  font-size: .68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Navigation mobile : même taille d'icône et même rythme pour les 5 entrées. */
+.ik-app .ik-bottom-nav {
+  min-height: 68px;
+  padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+}
+
+.ik-app .ik-bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  border-radius: 12px;
+  font-size: .72rem;
+  line-height: 1.15;
+}
+
+.ik-app .ik-bottom-nav a:hover {
+  background: color-mix(in srgb, var(--ik-green) 7%, transparent);
+}
+
+.ik-app .ik-nav-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+
+.ik-app .ik-nav-icon .icon,
+.ik-app .ik-nav-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.ik-app .ik-bottom-nav a[aria-current="page"] {
+  background: color-mix(in srgb, var(--ik-green) 10%, transparent);
+}
+
+/* Cartes et surfaces : fonds légèrement teintés, sans formes décoratives. */
+.ik-app .product-card,
+.ik-app .account-card,
+.ik-app .order-card,
+.ik-app .auth-card,
+.ik-app .contact-card,
+.ik-app .filters {
+  background: var(--ik-card);
+}
+
+/* Harmonisation optique des icônes d'action. */
+.ik-app .icon-btn .icon,
+.ik-app .cart-btn .icon,
+.ik-app .header-actions svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Mobile : header respirant, CTA texte masqué si l'espace devient critique. */
+@media (max-width: 760px) {
+  .ik-app .topbar { display: none; }
+
+  .ik-app .am-shell {
+    padding-inline: 12px;
+  }
+
+  .ik-app .am-nav {
+    min-height: 62px;
+    gap: 8px;
+  }
+
+  .ik-app .logo-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .ik-app .header-actions {
+    gap: 2px;
+  }
+
+  .ik-app .header-actions .icon-btn.plain,
+  .ik-app .header-actions .cart-btn {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+  }
+}
+
+@media (max-width: 420px) {
+  .ik-app .am-shell { padding-inline: 8px; }
+  .ik-app .ik-bottom-nav a { font-size: .68rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ik-app .header-actions .icon-btn.plain,
+  .ik-app .header-actions .cart-btn,
+  .ik-app .ik-bottom-nav a {
+    transition: none;
+  }
+}

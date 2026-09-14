@@ -57,52 +57,65 @@ export function CourierRegisterForm({ siteUrl }: { siteUrl: string }) {
   if (link) {
     const waMessage = encodeURIComponent(`Mon lien livreur ${siteUrl.replace(/^https?:\/\//, "")} : ${link}`);
     return (
-      <div className="contact-card">
-        <h3>C&apos;est fait !</h3>
-        <p>
-          Voici votre lien personnel. Gardez-le précieusement : c&apos;est lui qui vous donnera accès à vos livraisons
-          assignées, à chaque fois.
+      <div className="contact-card ik-courier-register-card">
+        <div className="ik-courier-register-heading">
+          <span className="ik-courier-register-icon" aria-hidden="true"><Icon name="check-circle" /></span>
+          <div>
+            <p className="ik-eyebrow">ESPACE LIVREUR</p>
+            <h3>Votre accès est prêt</h3>
+          </div>
+        </div>
+        <p className="ik-courier-register-intro">
+          Gardez ce lien personnel : il ouvre directement vos livraisons assignées, sans mot de passe supplémentaire.
         </p>
         <div className="form-row">
-          <input readOnly value={link} onFocus={(e) => e.currentTarget.select()} />
+          <label htmlFor="courierAccessLink">Votre lien personnel</label>
+          <input id="courierAccessLink" className="ik-courier-access-link" readOnly value={link} onFocus={(e) => e.currentTarget.select()} />
         </div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button type="button" className="btn btn-tonal" style={{ flex: 1 }} onClick={copyLink}>
+        <div className="ik-courier-register-actions">
+          <button type="button" className="btn btn-tonal" onClick={copyLink}>
             <Icon name="save" size="sm" />
             Copier le lien
           </button>
-          <a className="btn btn-whatsapp" style={{ flex: 1 }} href={`https://wa.me/${phone}?text=${waMessage}`} target="_blank" rel="noopener">
+          <a className="btn btn-whatsapp" href={`https://wa.me/${phone}?text=${waMessage}`} target="_blank" rel="noopener">
             <Icon name="whatsapp" size="sm" />
             Me l&apos;envoyer sur WhatsApp
           </a>
         </div>
-        <p className="form-note" style={{ marginTop: 14 }}>
-          Dès qu&apos;une livraison vous sera assignée, elle apparaîtra automatiquement sur ce lien.
+        <p className="ik-courier-register-note">
+          <Icon name="shield" size="sm" />
+          Ce lien est votre accès personnel. Ne le publiez pas : dès qu&apos;une livraison vous est assignée, elle y apparaît automatiquement.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="contact-card">
-      <h3>Vos informations</h3>
+    <div className="contact-card ik-courier-register-card">
+      <div className="ik-courier-register-heading">
+        <span className="ik-courier-register-icon" aria-hidden="true"><Icon name="shipping" /></span>
+        <div>
+          <p className="ik-eyebrow">ESPACE LIVREUR</p>
+          <h3>Créer mon accès</h3>
+        </div>
+      </div>
+      <p className="ik-courier-register-intro">
+        Renseignez uniquement votre nom et votre numéro WhatsApp. Nous générerons ensuite votre lien personnel de livraison.
+      </p>
       <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
-        {error ? (
-          <p className="form-note" style={{ color: "var(--error)" }}>
-            {error}
-          </p>
-        ) : null}
+        {error ? <p className="ik-courier-register-error" role="alert">{error}</p> : null}
         <div className="form-row">
           <label htmlFor="crName">Votre nom</label>
-          <input ref={nameRef} id="crName" type="text" required minLength={2} />
+          <input ref={nameRef} id="crName" type="text" autoComplete="name" required minLength={2} placeholder="Ex. Jean Mboa" />
         </div>
         <div className="form-row">
-          <label htmlFor="crPhone">Numéro WhatsApp</label>
-          <input ref={phoneRef} id="crPhone" type="tel" inputMode="tel" required placeholder="237655634265" />
+          <label htmlFor="crPhone">Numéro WhatsApp avec indicatif pays</label>
+          <input ref={phoneRef} id="crPhone" type="tel" inputMode="tel" autoComplete="tel" required placeholder="237655634265" aria-describedby="crPhoneHelp" />
+          <p id="crPhoneHelp" className="form-note">Exemple Cameroun : 237 suivi de votre numéro, sans espaces obligatoires.</p>
         </div>
         <StatefulButton className="btn btn-primary btn-lg btn-block" onValidate={validate} onRun={runSubmit}>
           <Icon name="check-circle" size="sm" />
-          M&apos;enregistrer comme livreur
+          Créer mon accès livreur
         </StatefulButton>
       </form>
     </div>

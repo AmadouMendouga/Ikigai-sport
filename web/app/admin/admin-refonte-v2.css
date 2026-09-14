@@ -1,0 +1,378 @@
+/* IKIGAI Sport — administration V2
+ * Interface opérationnelle : densité maîtrisée, hiérarchie claire, surfaces
+ * neutres et accent vert uniquement pour l'action/état prioritaire.
+ */
+
+.ik-admin {
+  --adm-panel: color-mix(in srgb, var(--surface) 94%, var(--ik-canvas));
+  --adm-line: var(--ik-line);
+}
+
+.ik-admin .adm-header {
+  border-bottom: 1px solid var(--adm-line);
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(12px) saturate(120%);
+}
+
+.ik-admin .adm-header .container {
+  gap: 12px;
+  min-height: 68px;
+}
+
+.ik-admin .adm-header .logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--ik-green);
+  color: #07351b;
+}
+
+.ik-admin .adm-header .logo {
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.ik-admin .adm-header .logo small {
+  margin-top: 1px;
+  color: var(--ik-muted);
+  font-size: .62rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+
+.ik-admin .adm-badge {
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid var(--adm-line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ik-muted);
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.ik-admin .adm-actions .btn {
+  min-height: 40px;
+  padding-inline: 13px;
+  border-radius: 10px;
+}
+
+.ik-admin .adm-workspace {
+  gap: 12px;
+}
+
+.ik-admin .adm-tabs {
+  gap: 4px;
+  padding: 22px 12px;
+}
+
+.ik-admin .adm-tab {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: var(--ik-muted);
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.ik-admin .adm-tab:hover {
+  border-color: var(--adm-line);
+  background: var(--surface);
+  color: var(--ik-ink);
+}
+
+.ik-admin .adm-tab.active,
+.ik-admin .adm-tab[aria-current="page"] {
+  border-color: color-mix(in srgb, var(--ik-green) 25%, var(--adm-line));
+  background: var(--ik-green-soft);
+  color: var(--ik-green-strong);
+}
+
+.ik-admin .adm-tab .cnt {
+  margin-left: auto;
+  min-width: 22px;
+  padding: 2px 6px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  color: inherit;
+  text-align: center;
+}
+
+.ik-admin .adm-page-heading {
+  margin-bottom: 18px;
+}
+
+.ik-admin .adm-page-heading h1 {
+  margin-bottom: 5px;
+  color: var(--ik-ink);
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  letter-spacing: -.04em;
+}
+
+.ik-admin .adm-page-heading p:not(.ik-eyebrow) {
+  max-width: 68ch;
+  color: var(--ik-muted);
+  line-height: 1.55;
+}
+
+.ik-admin .adm-toolbar {
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px;
+  border: 1px solid var(--adm-line);
+  border-radius: 14px;
+  background: var(--adm-panel);
+}
+
+.ik-admin .adm-toolbar .btn {
+  min-height: 42px;
+  border-radius: 10px;
+}
+
+.ik-admin .adm-toolbar .search-input,
+.ik-admin .adm-toolbar .sort-select {
+  min-height: 42px;
+  border-color: var(--adm-line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.ik-admin .adm-count {
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid var(--adm-line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ik-muted);
+  font-size: .74rem;
+  font-weight: 600;
+}
+
+.ik-admin .adm-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--adm-line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.ik-admin .adm-table {
+  font-size: .82rem;
+}
+
+.ik-admin .adm-table th {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--adm-line);
+  background: color-mix(in srgb, var(--surface) 88%, var(--ik-canvas));
+  color: var(--ik-muted);
+  font-size: .66rem;
+  letter-spacing: .055em;
+}
+
+.ik-admin .adm-table td {
+  padding: 11px 12px;
+  border-top-color: var(--adm-line);
+}
+
+.ik-admin .adm-table tr:hover td {
+  background: color-mix(in srgb, var(--ik-green) 3%, var(--surface));
+}
+
+.ik-admin .adm-table .name {
+  color: var(--ik-ink);
+  font-weight: 600;
+}
+
+.ik-admin .adm-table .sub {
+  color: var(--ik-muted);
+  font-size: .72rem;
+}
+
+.ik-admin .adm-thumb {
+  width: 48px;
+  height: 48px;
+  border-color: var(--adm-line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 80%, var(--ik-canvas));
+  object-fit: contain;
+}
+
+.ik-admin .adm-row-actions .icon-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--adm-line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ik-ink);
+}
+
+.ik-admin .adm-row-actions .icon-btn:hover {
+  border-color: color-mix(in srgb, var(--ik-green) 35%, var(--adm-line));
+  background: var(--ik-green-soft);
+  color: var(--ik-green-strong);
+}
+
+.ik-admin .adm-field label {
+  color: var(--ik-muted);
+  font-size: .7rem;
+  font-weight: 600;
+}
+
+.ik-admin .adm-field input,
+.ik-admin .adm-field textarea,
+.ik-admin .adm-field select {
+  min-height: 46px;
+  border-color: var(--adm-line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 94%, var(--ik-canvas));
+  box-shadow: none;
+}
+
+.ik-admin .adm-field input:focus,
+.ik-admin .adm-field textarea:focus,
+.ik-admin .adm-field select:focus {
+  border-color: var(--ik-green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ik-green) 16%, transparent);
+}
+
+.ik-admin .adm-drawer {
+  width: min(540px, 96vw);
+  border-left: 1px solid var(--adm-line);
+  background: var(--surface);
+  box-shadow: -20px 0 48px rgb(15 23 42 / 16%);
+}
+
+.ik-admin .adm-drawer-head,
+.ik-admin .adm-drawer-foot {
+  border-color: var(--adm-line);
+  background: color-mix(in srgb, var(--surface) 96%, var(--ik-canvas));
+}
+
+.ik-admin .adm-drawer-head {
+  min-height: 64px;
+  padding: 14px 18px;
+  color: var(--ik-ink);
+  font-weight: 700;
+}
+
+.ik-admin .adm-drawer-body {
+  padding: 18px;
+}
+
+.ik-admin .adm-drawer-foot {
+  padding: 12px 18px;
+}
+
+.ik-admin .adm-overlay {
+  background: rgb(15 23 42 / 42%);
+  backdrop-filter: blur(2px);
+}
+
+.ik-admin .adm-drop,
+.ik-admin .adm-gadd {
+  border-width: 1px;
+  border-color: var(--adm-line);
+  border-radius: 12px;
+  background: var(--adm-panel);
+}
+
+.ik-admin .adm-drop:hover,
+.ik-admin .adm-drop.over,
+.ik-admin .adm-gadd:hover {
+  border-color: color-mix(in srgb, var(--ik-green) 45%, var(--adm-line));
+  background: var(--ik-green-soft);
+}
+
+.ik-admin .adm-gcard,
+.ik-admin .adm-tcard,
+.ik-admin .adm-login-card {
+  border-color: var(--adm-line);
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+html[data-theme="dark"] .ik-admin {
+  --adm-panel: color-mix(in srgb, var(--surface) 90%, var(--surface-container));
+}
+
+html[data-theme="dark"] .ik-admin .adm-page-heading h1,
+html[data-theme="dark"] .ik-admin .adm-table .name,
+html[data-theme="dark"] .ik-admin .adm-drawer-head,
+html[data-theme="dark"] .ik-admin .adm-tab:hover {
+  color: var(--on-surface);
+}
+
+html[data-theme="dark"] .ik-admin .adm-tab.active,
+html[data-theme="dark"] .ik-admin .adm-tab[aria-current="page"] {
+  background: color-mix(in srgb, var(--primary-container) 66%, var(--surface));
+  color: var(--on-primary-container);
+}
+
+@media (max-width: 900px) {
+  .ik-admin .adm-header .container {
+    padding-inline: 14px;
+  }
+
+  .ik-admin .adm-toolbar {
+    align-items: stretch;
+  }
+
+  .ik-admin .adm-toolbar .grow,
+  .ik-admin .adm-toolbar .field-wrap,
+  .ik-admin .adm-toolbar .search-input,
+  .ik-admin .adm-toolbar .sort-select {
+    width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .ik-admin .adm-header .container {
+    gap: 8px;
+  }
+
+  .ik-admin .adm-badge {
+    order: 3;
+    width: 100%;
+    max-width: none;
+    justify-content: center;
+  }
+
+  .ik-admin .adm-actions {
+    gap: 5px;
+  }
+
+  .ik-admin .adm-actions .btn {
+    padding-inline: 10px;
+  }
+
+  .ik-admin .adm-tabs {
+    padding: 8px 12px 12px;
+  }
+
+  .ik-admin .adm-tab {
+    min-height: 42px;
+  }
+
+  .ik-admin .adm-toolbar {
+    padding: 8px;
+  }
+
+  .ik-admin .adm-toolbar > .btn {
+    flex: 1 1 100%;
+  }
+
+  .ik-admin .adm-drawer {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ik-admin .adm-tab,
+  .ik-admin .adm-drawer,
+  .ik-admin .adm-overlay {
+    transition: none;
+  }
+}
