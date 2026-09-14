@@ -31,7 +31,7 @@ Ne pas transformer le projet en plusieurs applications indépendantes sans raiso
 
 ## 3. Stack technique
 
-Code actif principal : `web/`.
+Code actif principal : `web/`. Dépôt GitHub : `AmadouMendouga/Ikigai-sport`. Déploiement en ligne réel : **`ikigai-sport.naragroup.cc.cd`** (projet Vercel `le-maillot-ideal-preview` malgré son nom — `le-maillot-ideal.com` est une adresse différente, plus à jour).
 
 - **Next.js 16 App Router** + React + TypeScript.
 - **Firebase Auth** pour les identités.
@@ -40,7 +40,7 @@ Code actif principal : `web/`.
 - **CamPay** pour MTN/Orange Mobile Money.
 - **Cloudinary** pour les médias.
 - **Leaflet + OpenFreeMap + OSRM** pour le suivi et l'itinéraire de livraison.
-- **Vercel** pour les previews et le déploiement.
+- **Vercel** pour les previews et le déploiement (plan gratuit : ~100 déploiements/jour max, l'erreur `api-deployments-free-per-day` se résout d'elle-même après quelques heures).
 
 Aucun secret dans le code : utiliser uniquement les variables d'environnement.
 
@@ -59,8 +59,8 @@ Aucun secret dans le code : utiliser uniquement les variables d'environnement.
 
 - `web/app/lmi.css` : base globale et tokens.
 - `web/app/ikigai-ui.css` : interface publique IKIGAI.
-- `web/app/ikigai-ux-polish.css` : améliorations UX récentes.
-- `web/app/admin/admin.css` : interface admin.
+- `web/app/ikigai-ux-polish.css`, `ikigai-refonte-v2.css`, `ikigai-refonte-v2-components.css`, `ikigai-refonte-v2-finalize.css`, `ikigai-rareui-polish.css`, `ikigai-commerce-polish.css`, `ikigai-journey-polish.css` : couches successives de la refonte visuelle (PR #16, fusionnée le 14/09/2026). Avant d'ajouter une **nouvelle** couche CSS, vérifier si une règle existante dans ces fichiers ne couvre pas déjà le besoin — ne pas empiler un 8ᵉ fichier sans raison.
+- `web/app/admin/admin.css` + `web/app/admin/admin-refonte-v2.css` : interface admin.
 
 ### Règles d'ergonomie
 
@@ -72,6 +72,8 @@ Aucun secret dans le code : utiliser uniquement les variables d'environnement.
 - Prévoir clair + sombre quand le composant est concerné.
 - Respecter `prefers-reduced-motion`.
 - Tester les petits écrans avant de considérer un écran terminé.
+
+**Piège vécu (14/09/2026) :** une règle de thème sombre ciblait `.ik-app[data-theme="dark"]` / `.ik-app:not([data-theme="light"])` au lieu de `html[data-theme="dark"] .ik-app` / `html:not([data-theme="light"]) .ik-app`. `data-theme` n'est posé que sur `<html>` (voir `app/layout.tsx`), jamais sur `.ik-app` — la règle mal ciblée s'activait donc dès que le système du visiteur préfère le mode sombre, même quand le site affichait le thème clair, rendant des titres quasi invisibles (texte très clair sur fond blanc). Toujours vérifier sur quel élément `data-theme` est réellement posé avant d'écrire une règle de thème.
 
 Ne jamais copier aveuglément une référence UI : reprendre les bons principes tout en conservant l'identité IKIGAI.
 
@@ -124,6 +126,7 @@ scripts/                         scripts ponctuels
 - Préfixes CSS déjà utilisés : `ik-`, `dlv-`, `cp-`, `adm-`, `pd-`.
 - Éviter les duplications : réutiliser les composants existants avant d'en créer un nouveau.
 - Les règles de sécurité doivent être appliquées côté serveur, jamais seulement dans l'interface.
+- **Noms de fichiers à la racine du projet : attention à la casse.** Windows ne distingue pas `NARA.md` de `nara.md` sur le disque (un seul fichier physique existe réellement), alors que Git les suit comme deux fichiers différents — créer les deux en parallèle corrompt silencieusement le contenu (le second écrase le premier sur le disque sans avertissement). Un seul fichier `NARA.md` à la racine, jamais de variante de casse.
 
 ---
 
@@ -135,6 +138,20 @@ scripts/                         scripts ponctuels
 - Un admin doit être vérifié côté serveur avant toute lecture ou mutation privée.
 - Les liens livraison/livreur/avis utilisent des jetons dédiés quand une session complète n'est pas nécessaire.
 - Ne jamais exposer au client les jetons réservés au livreur ou à l'administration.
+- **Ne jamais manipuler ou afficher un mot de passe en clair**, même pour dépanner le propriétaire du projet — utiliser le lien « mot de passe oublié » existant, ou `scripts/create-admin.mjs` pour définir un nouveau mot de passe sur un compte admin existant sans le recréer.
+
+### Piège vécu (14/09/2026) — `/api/session` renvoyait 500 en production
+
+Symptôme : la connexion admin échouait toujours (« adresse e-mail ou mot de passe incorrect ») alors que les identifiants étaient corrects. La vraie cause n'était **pas** les variables d'environnement Firebase Admin (déjà correctes), mais une incompatibilité de build :
+
+```
+Error: Failed to load external module firebase-admin.../auth: Error [ERR_REQUIRE_ESM]:
+require() of ES Module .../node_modules/jose/dist/webapi/index.js ... not supported.
+```
+
+`firebase-admin@14.4.0` → `jwks-rsa` → `jose@6.x` (ESM uniquement, sans `require()`), incompatible avec le bundling serverless de Vercel — invisible en local avec `next dev` (seul le vrai build de production le révèle : `npm run build && npm run start`). Corrigé par un `overrides` dans `web/package.json` forçant `jose` en version `4.15.9` (compatible CommonJS **et** ESM). Si une erreur `ERR_REQUIRE_ESM` réapparaît après une mise à jour de `firebase-admin`, revérifier cet override en premier — ne pas réinvestiguer les variables d'environnement par défaut.
+
+**Toujours tester une correction liée à `firebase-admin`/l'auth avec un vrai build de production local (`npm run build && npm run start`), pas seulement `next dev`** : certains bugs de bundling n'apparaissent qu'en production.
 
 ---
 
@@ -201,6 +218,13 @@ npm test
 npx tsc --noEmit
 ```
 
+Pour un correctif touchant `firebase-admin`, l'auth ou tout ce qui est bundlé côté serveur, ajouter un vrai build de production :
+
+```bash
+npm run build
+npm run start
+```
+
 Tests existants importants :
 
 - `tests/lib.test.mjs`
@@ -215,7 +239,7 @@ La CI GitHub est définie dans :
 
 La CI GitHub valide lint + tests + TypeScript. Le vrai build Next.js avec les variables Firebase de l'environnement est vérifié par **Vercel**.
 
-Ne jamais annoncer qu'un bug est corrigé uniquement parce que le code compile : tester aussi le comportement concerné.
+Ne jamais annoncer qu'un bug est corrigé uniquement parce que le code compile : tester aussi le comportement concerné, idéalement avec un vrai build de production quand le bug touche le serveur.
 
 ---
 
@@ -227,12 +251,13 @@ Ne jamais annoncer qu'un bug est corrigé uniquement parce que le code compile :
 4. Lancer lint, tests et typecheck.
 5. Ouvrir une PR vers `master`.
 6. Vérifier les checks GitHub et Vercel.
-7. Tester la preview sur mobile et desktop pour les changements UI ou parcours utilisateur.
+7. Tester la preview sur mobile et desktop, **clair et sombre**, pour les changements UI ou parcours utilisateur.
 8. Ne fusionner que si le lot est cohérent et les contrôles nécessaires sont verts.
-9. Après fusion, vérifier le déploiement et les parcours critiques.
+9. Après fusion, vérifier le déploiement et les parcours critiques sur le vrai domaine (`ikigai-sport.naragroup.cc.cd`).
 
-Branche de travail actuelle : `fix/ikigai-audit-ux`.
-PR actuelle : **#10 — Fix IKIGAI payment retries and improve mobile UX**.
+**Sessions parallèles :** plusieurs sessions IA peuvent travailler sur ce projet en même temps. Avant de commencer un gros lot de travail, vérifier s'il existe déjà une branche/PR ouverte sur le même sujet (`gh pr list`) pour éviter le travail en double ou les fusions qui s'écrasent. Si une note de type « pause, ne pas fusionner sans validation » existe dans une branche ou un fichier de reprise, la respecter strictement — ne jamais fusionner ou déployer à sa place sans un accord explicite du propriétaire.
+
+Pas de branche de travail dédiée à date de cette mise à jour (14/09/2026) : le dépôt est directement sur `master`, qui reflète l'état déployé.
 
 ---
 
@@ -245,7 +270,7 @@ Déjà présent ou corrigé :
 - paiement CamPay avec webhook et réconciliation ;
 - protection renforcée contre les doubles tentatives de paiement ;
 - compte client, commandes et profil ;
-- admin ;
+- admin (+ refonte visuelle v2, PR #16 fusionnée le 14/09/2026) ;
 - favoris ;
 - suivi GPS client/livreur ;
 - itinéraire OSRM avec repli propre si indisponible ;
@@ -255,7 +280,8 @@ Déjà présent ou corrigé :
 - UI mobile améliorée avec navigation basse ;
 - contrôles tactiles et formulaires améliorés ;
 - CI dédiée à `web/` ;
-- tests critiques paiement, stock, auth, commandes et livraison.
+- tests critiques paiement, stock, auth, commandes et livraison ;
+- Vercel Analytics (compteur de visites/pages vues).
 
 Ne pas reconstruire ces fonctionnalités sans identifier d'abord un problème réel.
 
