@@ -251,6 +251,31 @@
   gap: 10px;
 }
 
+.ik-app .ik-order-card.is-trackable {
+  border-color: color-mix(in srgb, var(--ik-green) 38%, var(--ik-line));
+  background: color-mix(in srgb, var(--surface) 94%, var(--ik-green-soft));
+}
+
+.ik-app .ik-order-detail-link.is-primary {
+  justify-content: center;
+  min-height: 46px;
+  padding: 11px 14px;
+  border-top: 0;
+  border-radius: 12px;
+  background: var(--ik-green);
+  color: #fff;
+}
+
+.ik-app .ik-order-detail-link.is-primary .icon {
+  color: currentColor;
+}
+
+@media (hover: hover) {
+  .ik-app .ik-order-detail-link.is-primary:hover {
+    background: var(--ik-green-strong);
+  }
+}
+
 .ik-app .ik-order-parcel {
   width: 42px;
   height: 42px;
