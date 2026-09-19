@@ -2,6 +2,8 @@
 
 > Guide court à respecter pour toute intervention sur le projet. Lire aussi `CLAUDE.md` et `DEPLOIEMENT.md` si un point demande plus de détail.
 
+> **RELANCE ACTIVE — 19/09/2026.** La refonte est reprise depuis l'état actuel de `master`, pas depuis l'ancienne branche déjà fusionnée. Branche de travail : `design/ikigai-refonte-relance`. Priorité : finaliser le parcours compte/commandes, puis tracking/livreur, puis admin, sans affaiblir Firebase/Firestore/Auth, CamPay, le stock ni les garanties de livraison.
+
 ---
 
 ## 1. Règles fondamentales
@@ -257,7 +259,7 @@ Ne jamais annoncer qu'un bug est corrigé uniquement parce que le code compile :
 
 **Sessions parallèles :** plusieurs sessions IA peuvent travailler sur ce projet en même temps. Avant de commencer un gros lot de travail, vérifier s'il existe déjà une branche/PR ouverte sur le même sujet (`gh pr list`) pour éviter le travail en double ou les fusions qui s'écrasent. Si une note de type « pause, ne pas fusionner sans validation » existe dans une branche ou un fichier de reprise, la respecter strictement — ne jamais fusionner ou déployer à sa place sans un accord explicite du propriétaire.
 
-Pas de branche de travail dédiée à date de cette mise à jour (14/09/2026) : le dépôt est directement sur `master`, qui reflète l'état déployé.
+Branche de travail active depuis le 19/09/2026 : `design/ikigai-refonte-relance`, créée depuis le `master` courant (`669deb4`). L'ancienne branche `design/ikigai-utile-refonte` correspond à la PR #16 déjà fusionnée et est désormais en retard sur `master` ; ne pas repartir de cette ancienne branche pour la relance.
 
 ---
 
@@ -284,6 +286,17 @@ Déjà présent ou corrigé :
 - Vercel Analytics (compteur de visites/pages vues).
 
 Ne pas reconstruire ces fonctionnalités sans identifier d'abord un problème réel.
+
+### Phase active de relance — 19/09/2026
+
+Ordre de travail validé pour la reprise :
+
+1. compte client et commandes : lisibilité, hiérarchie, états vides, progression et détails ;
+2. tracking et interface livreur : clarté du statut, prochaine action, GPS/itinéraire et confirmation de remise ;
+3. admin : cohérence visuelle, densité, responsive et actions critiques ;
+4. validation finale desktop/mobile, clair/sombre, puis CI et preview Vercel avant toute fusion.
+
+Cette phase est une continuation de l'existant : pas de nouvelle architecture ni de nouvelle logique métier sans besoin démontré.
 
 ---
 
