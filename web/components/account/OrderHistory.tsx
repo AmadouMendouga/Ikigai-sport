@@ -39,7 +39,9 @@ export function OrderHistory({ orders, sport }: { orders: CustomerOrderView[]; s
     <p className="sr-only" role="status" aria-live="polite">{refreshing ? "Actualisation des commandes en cours" : ""}</p>
     {warning ? <p className="ik-inline-warning" role="status">{warning}</p> : null}
     <div className="ik-order-list" role="tabpanel" id={panelId} aria-labelledby={`${id}-tab-${tab}`} tabIndex={0}>
-      {groups[tab].map((order) => {\n        const isTrackable = order.status === "en_route" || order.status === "arrivee";\n        return <article key={order.id} className={`ik-order-card${isTrackable ? " is-trackable" : ""}`}>
+      {groups[tab].map((order) => {
+        const isTrackable = order.status === "en_route" || order.status === "arrivee";
+        return <article key={order.id} className={`ik-order-card${isTrackable ? " is-trackable" : ""}`}>
         <div className="ik-order-card-head"><span className="ik-order-parcel" aria-hidden="true"><Icon name="inventory" /></span>
           <div><strong>IKIGAI Sport</strong><p><time dateTime={order.createdAt}>{orderDate(order.createdAt)}</time> · #{order.id.slice(-6).toUpperCase()}</p></div>
           <span className={`ik-order-badge ik-order-badge--${order.status}`}>{ORDER_STATUS_LABELS[order.status]}</span>
@@ -47,8 +49,11 @@ export function OrderHistory({ orders, sport }: { orders: CustomerOrderView[]; s
         <div className="ik-order-summary"><h2>{order.summary}</h2>{order.total !== null ? <strong>{FCFA(order.total)}</strong> : null}</div>
         {order.deliverySlot && !["livree", "annulee"].includes(order.status) ? <p className="ik-order-slot"><Icon name="schedule" size="sm" />Créneau convenu : {order.deliverySlot}</p> : null}
         <p className="ik-muted">{customerOrderMessage(order)}</p>
-        <Link href={`/${sport}/compte/commandes/${encodeURIComponent(order.id)}`} className="ik-order-detail-link">Voir le détail et l’avancement<Icon name="arrow-forward" size="sm" /></Link>
-      </article>)}
+        <Link href={`/${sport}/compte/commandes/${encodeURIComponent(order.id)}`} className={`ik-order-detail-link${isTrackable ? " is-primary" : ""}`}>
+          {isTrackable ? <>Suivre ma livraison<Icon name="location" size="sm" /></> : <>Voir le détail et l’avancement<Icon name="arrow-forward" size="sm" /></>}
+        </Link>
+      </article>;
+      })}
       {!groups[tab].length ? <div className="ik-account-empty"><Icon name="inventory" size="xl" /><h2>{tab === "history" ? "Votre historique commence ici" : tab === "scheduled" ? "Aucun créneau planifié" : "Aucune commande en cours"}</h2><p className="ik-muted">{tab === "scheduled" ? "Les commandes avec un créneau convenu apparaîtront ici jusqu’au départ du livreur." : "Retrouvez vos équipements préférés dans la boutique."}</p><Link href={`/${sport}/boutique`} className="btn btn-primary">Explorer la boutique<Icon name="arrow-forward" size="sm" /></Link></div> : null}
     </div>
   </>;
