@@ -39,7 +39,7 @@ export function OrderHistory({ orders, sport }: { orders: CustomerOrderView[]; s
     <p className="sr-only" role="status" aria-live="polite">{refreshing ? "Actualisation des commandes en cours" : ""}</p>
     {warning ? <p className="ik-inline-warning" role="status">{warning}</p> : null}
     <div className="ik-order-list" role="tabpanel" id={panelId} aria-labelledby={`${id}-tab-${tab}`} tabIndex={0}>
-      {groups[tab].map((order) => <article key={order.id} className="ik-order-card">
+      {groups[tab].map((order) => {\n        const isTrackable = order.status === "en_route" || order.status === "arrivee";\n        return <article key={order.id} className={`ik-order-card${isTrackable ? " is-trackable" : ""}`}>
         <div className="ik-order-card-head"><span className="ik-order-parcel" aria-hidden="true"><Icon name="inventory" /></span>
           <div><strong>IKIGAI Sport</strong><p><time dateTime={order.createdAt}>{orderDate(order.createdAt)}</time> · #{order.id.slice(-6).toUpperCase()}</p></div>
           <span className={`ik-order-badge ik-order-badge--${order.status}`}>{ORDER_STATUS_LABELS[order.status]}</span>
