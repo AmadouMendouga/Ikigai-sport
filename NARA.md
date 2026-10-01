@@ -139,6 +139,8 @@ scripts/                         scripts ponctuels
 - Les liens livraison/livreur/avis utilisent des jetons dédiés quand une session complète n'est pas nécessaire.
 - Ne jamais exposer au client les jetons réservés au livreur ou à l'administration.
 - **Ne jamais manipuler ou afficher un mot de passe en clair**, même pour dépanner le propriétaire du projet — utiliser le lien « mot de passe oublié » existant, ou `scripts/create-admin.mjs` pour définir un nouveau mot de passe sur un compte admin existant sans le recréer.
+- **Inscription livreur (01/10/2026)** : `/livreur/inscription` est publique. Le profil est donc créé inactif et marqué `pendingApproval` ; il ne devient assignable qu'après « Valider » dans le tiroir « Livreurs » de l'admin (« Refuser » supprime la demande). Un numéro déjà enregistré est refusé et les demandes en attente sont plafonnées à 20. Ne pas recréer de profil actif d'office.
+- **En-têtes de sécurité (01/10/2026)** : définis dans `web/next.config.ts`. La CSP se limite à `frame-ancestors`, `base-uri`, `object-src`, `form-action` : ajouter `script-src`/`connect-src` demande de tester chaque parcours (carte OpenFreeMap/OSRM, envois Cloudinary, connexion Firebase). `Permissions-Policy` doit garder `camera=(self)` (scan du QR de remise) et `geolocation=(self)` (partage de position).
 
 ### Piège vécu (14/09/2026) — `/api/session` renvoyait 500 en production
 
@@ -183,6 +185,12 @@ Fichiers principaux :
 - `web/app/api/campay/webhook/route.ts`
 - `web/components/account/PaymentStatusPoller.tsx`
 
+### État au 01/10/2026
+
+- En production (`VERCEL_ENV=production`), `web/lib/campay.ts` refuse tout appel si `CAMPAY_BASE_URL` ou `CAMPAY_PERMANENT_ACCESS_TOKEN` manque, au lieu de retomber sur le bac à sable `demo.campay.net` : aucun débit, stock libéré, message clair au client.
+- Constat du même jour (`vercel env ls production`) : **aucune variable `CAMPAY_*` ni `CRON_SECRET` n'existe en production**. Le paiement Mobile Money et le nettoyage quotidien des positions GPS ne peuvent donc pas fonctionner en ligne tant que le propriétaire ne les a pas ajoutées. Revérifier cette liste avant de diagnostiquer un bug de paiement en production.
+- Le propriétaire a décidé de remplacer CamPay par **ElgioPay** (elgiopay.com), puis a mis le sujet de côté. Le plan et les points à vérifier sur le bac à sable sont dans `web/docs/2026-10-01-plan-elgiopay.md`. Ne rien coder côté paiement sans clés de test : la référence d'API publique est incomplète.
+
 ---
 
 ## 9. Commandes et livraison
@@ -195,6 +203,7 @@ Fichiers principaux :
 - À la livraison, clôturer correctement le partage GPS.
 - Le client et le livreur ne doivent jamais recevoir les mêmes capacités privées.
 - L'itinéraire doit être réel quand OSRM est disponible ; ne jamais dessiner un faux itinéraire en cas de réponse invalide.
+- L'effet de tracé de l'itinéraire (`playRouteDraw` dans `DeliveryMap.tsx`, règle `dlv-route-draw` dans `lmi.css`, 01/10/2026) est purement décoratif : il joue une fois à l'apparition de l'itinéraire et ne déplace ni marqueur ni caméra. Ne pas animer le marqueur du livreur le long du trajet : il doit rester à sa position GPS réelle.
 
 ---
 
@@ -237,7 +246,12 @@ La CI GitHub est définie dans :
 
 - `.github/workflows/ikigai-web-ci.yml`
 
-La CI GitHub valide lint + tests + TypeScript. Le vrai build Next.js avec les variables Firebase de l'environnement est vérifié par **Vercel**.
+La CI GitHub valide l'audit des dépendances de production (elle bloque sur une faille **critique**), le lint, les tests, les règles Firestore et TypeScript. Le vrai build Next.js avec les variables Firebase de l'environnement est vérifié par **Vercel**.
+
+Deux suites ne tournent qu'en local :
+
+- `npm run test:rules` lance l'émulateur Firestore sur le port **8080**. S'il est déjà pris par un autre projet de la machine, l'émulateur refuse de démarrer (« port taken ») : libérer le port ou lancer l'émulateur avec un `--config` pointant vers une copie de `firebase.json` sur un autre port.
+- `npm run test:browser` (build + audit Playwright) contrôle l'espace admin seulement si `LMI_TEST_ADMIN_EMAIL` est défini dans `web/.env.local` ; sans cette variable, il signale un échec sur ce seul contrôle.
 
 Ne jamais annoncer qu'un bug est corrigé uniquement parce que le code compile : tester aussi le comportement concerné, idéalement avec un vrai build de production quand le bug touche le serveur.
 
@@ -257,7 +271,7 @@ Ne jamais annoncer qu'un bug est corrigé uniquement parce que le code compile :
 
 **Sessions parallèles :** plusieurs sessions IA peuvent travailler sur ce projet en même temps. Avant de commencer un gros lot de travail, vérifier s'il existe déjà une branche/PR ouverte sur le même sujet (`gh pr list`) pour éviter le travail en double ou les fusions qui s'écrasent. Si une note de type « pause, ne pas fusionner sans validation » existe dans une branche ou un fichier de reprise, la respecter strictement — ne jamais fusionner ou déployer à sa place sans un accord explicite du propriétaire.
 
-Pas de branche de travail dédiée à date de cette mise à jour (14/09/2026) : le dépôt est directement sur `master`, qui reflète l'état déployé.
+À date de cette mise à jour (01/10/2026), `master` reflète l'état déployé et les branches déjà fusionnées ont été supprimées. Deux branches distantes restent, sans PR et avec des commits absents de `master` : `audit/impeccable-design-check` et `audit/impeccable-production-postfix`. La fusion automatique GitHub n'est pas autorisée sur le dépôt.
 
 ---
 
@@ -281,7 +295,9 @@ Déjà présent ou corrigé :
 - contrôles tactiles et formulaires améliorés ;
 - CI dédiée à `web/` ;
 - tests critiques paiement, stock, auth, commandes et livraison ;
-- Vercel Analytics (compteur de visites/pages vues).
+- Vercel Analytics (compteur de visites/pages vues) ;
+- Next.js 16.3.8, en-têtes de sécurité, validation des livreurs par l'admin, garde-fou CamPay en production (PR #20, 01/10/2026) ;
+- effet de tracé de l'itinéraire sur la carte de livraison (PR #21, 01/10/2026).
 
 Ne pas reconstruire ces fonctionnalités sans identifier d'abord un problème réel.
 
