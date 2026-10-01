@@ -106,6 +106,9 @@ export interface Courier {
   /** Jeton permanent, personnel — donne accès à /livreur/[token] tant qu'il reste actif. */
   token: string;
   active: boolean;
+  /** Inscription publique pas encore validée par l'admin. Absent sur les
+   * profils créés avant cette validation (ils restent tels quels). */
+  pendingApproval?: boolean;
   createdAt: string;
 }
 

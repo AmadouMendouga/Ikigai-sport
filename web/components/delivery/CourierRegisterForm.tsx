@@ -62,11 +62,12 @@ export function CourierRegisterForm({ siteUrl }: { siteUrl: string }) {
           <span className="ik-courier-register-icon" aria-hidden="true"><Icon name="check-circle" /></span>
           <div>
             <p className="ik-eyebrow">ESPACE LIVREUR</p>
-            <h3>Votre accès est prêt</h3>
+            <h3>Demande envoyée</h3>
           </div>
         </div>
         <p className="ik-courier-register-intro">
-          Gardez ce lien personnel : il ouvre directement vos livraisons assignées, sans mot de passe supplémentaire.
+          Votre inscription doit encore être validée par notre équipe. Gardez ce lien personnel dès maintenant : une fois
+          la validation faite, il ouvrira vos livraisons assignées, sans mot de passe supplémentaire.
         </p>
         <div className="form-row">
           <label htmlFor="courierAccessLink">Votre lien personnel</label>
@@ -84,7 +85,7 @@ export function CourierRegisterForm({ siteUrl }: { siteUrl: string }) {
         </div>
         <p className="ik-courier-register-note">
           <Icon name="shield" size="sm" />
-          Ce lien est votre accès personnel. Ne le publiez pas : dès qu&apos;une livraison vous est assignée, elle y apparaît automatiquement.
+          Ce lien est votre accès personnel. Ne le publiez pas : après validation, chaque livraison qui vous est assignée y apparaît automatiquement.
         </p>
       </div>
     );
@@ -100,7 +101,7 @@ export function CourierRegisterForm({ siteUrl }: { siteUrl: string }) {
         </div>
       </div>
       <p className="ik-courier-register-intro">
-        Renseignez uniquement votre nom et votre numéro WhatsApp. Nous générerons ensuite votre lien personnel de livraison.
+        Renseignez uniquement votre nom et votre numéro WhatsApp. Vous recevrez votre lien personnel de livraison, actif dès que notre équipe aura validé votre inscription.
       </p>
       <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
         {error ? <p className="ik-courier-register-error" role="alert">{error}</p> : null}

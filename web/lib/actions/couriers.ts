@@ -17,23 +17,47 @@ import { adminDb } from "@/lib/firebase/admin";
 import type { Courier, Order } from "@/lib/types";
 import { COURIER_ACCESS_STATUSES, normalizeOrderStatus, TERMINAL_ORDER_STATUSES } from "@/lib/orderWorkflow";
 
+// Plafond de demandes en attente : l'inscription est publique (aucune
+// session), donc sans borne n'importe qui pourrait remplir la collection de
+// faux profils. Au-delà, on renvoie vers WhatsApp le temps que l'admin trie.
+const MAX_PENDING_COURIERS = 20;
+const MAX_COURIER_NAME_LENGTH = 80;
+
+// Inscription publique : le profil est créé INACTIF et marqué « à valider ».
+// Tant que l'admin ne l'a pas validé (setCourierActiveAction), il n'apparaît
+// pas dans la liste d'assignation et son lien personnel n'ouvre rien — un
+// inconnu qui trouve l'URL d'inscription ne devient jamais livreur tout seul.
 export async function registerCourierAction(input: {
   name: string;
   phone: string;
 }): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
-  const name = input.name.trim();
-  const phone = input.phone.replace(/\D/g, "");
+  const name = String(input?.name || "").trim();
+  const phone = String(input?.phone || "").replace(/\D/g, "");
   if (!name) return { ok: false, error: "Le nom est obligatoire." };
+  if (name.length > MAX_COURIER_NAME_LENGTH) return { ok: false, error: "Le nom est trop long." };
   if (phone.length < 8 || phone.length > 15) {
     return { ok: false, error: "Le numéro WhatsApp doit contenir 8 à 15 chiffres." };
   }
 
+  const couriers = adminDb.collection("couriers");
+  // Un numéro = un profil. On ne renvoie jamais le lien existant : ce serait
+  // donner l'accès d'un livreur à quiconque connaît son numéro.
+  const samePhone = await couriers.where("phone", "==", phone).limit(1).get();
+  if (!samePhone.empty) {
+    return { ok: false, error: "Ce numéro est déjà enregistré. Contactez-nous sur WhatsApp si vous avez perdu votre lien." };
+  }
+  const pending = await couriers.where("pendingApproval", "==", true).limit(MAX_PENDING_COURIERS).get();
+  if (pending.size >= MAX_PENDING_COURIERS) {
+    return { ok: false, error: "Trop de demandes sont en attente pour le moment. Contactez-nous sur WhatsApp." };
+  }
+
   const token = randomUUID();
-  await adminDb.collection("couriers").add({
+  await couriers.add({
     name,
     phone,
     token,
-    active: true,
+    active: false,
+    pendingApproval: true,
     createdAt: new Date().toISOString(),
   });
 
@@ -46,7 +70,8 @@ export async function setCourierActiveAction(id: string, active: boolean): Promi
   const snap = await ref.get();
   if (!snap.exists) return { ok: false, error: "Livreur introuvable." };
   if (active) {
-    await ref.update({ active: true });
+    // Activer vaut validation : la demande n'est plus « en attente ».
+    await ref.update({ active: true, pendingApproval: false });
     return { ok: true };
   }
 
@@ -66,6 +91,21 @@ export async function setCourierActiveAction(id: string, active: boolean): Promi
     }
   });
   await batch.commit();
+  return { ok: true };
+}
+
+// Refuse une demande d'inscription jamais validée (faux profil, doublon…).
+// Limité aux profils « à valider » : un livreur déjà validé peut avoir des
+// livraisons et des gains rattachés, on le désactive mais on ne l'efface pas.
+export async function rejectCourierAction(id: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  await verifyAdminSession();
+  const ref = adminDb.collection("couriers").doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return { ok: false, error: "Livreur introuvable." };
+  if ((snap.data() as Courier).pendingApproval !== true) {
+    return { ok: false, error: "Seule une demande en attente peut être refusée. Désactivez plutôt ce livreur." };
+  }
+  await ref.delete();
   return { ok: true };
 }
 
@@ -135,7 +175,14 @@ export async function getCourierDashboardAction(token: string): Promise<
   if (courierSnap.empty) return { ok: false, error: "Ce lien n'est pas valide." };
   const courierDoc = courierSnap.docs[0];
   const courier = courierDoc.data() as Omit<Courier, "id">;
-  if (!courier.active) return { ok: false, error: "Ce profil livreur n'est plus actif. Contactez-nous pour en savoir plus." };
+  if (!courier.active) {
+    return {
+      ok: false,
+      error: courier.pendingApproval
+        ? "Votre inscription est en attente de validation. Ce lien s'activera dès qu'elle sera validée."
+        : "Ce profil livreur n'est plus actif. Contactez-nous pour en savoir plus.",
+    };
+  }
 
   const assignedSnap = await adminDb.collection("orders").where("assignedCourierId", "==", courierDoc.id).get();
   const orderDoc = assignedSnap.docs
