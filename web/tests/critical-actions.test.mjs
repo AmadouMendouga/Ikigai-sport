@@ -27,6 +27,7 @@ function makeDb(initial) {
     },
     set(value, options) { apply(options?.merge ? "update" : "set", this, value); return Promise.resolve(); },
     update(value) { apply("update", this, value); return Promise.resolve(); },
+    delete() { rows.delete(this.path); return Promise.resolve(); },
     collection(name) { return collection(`${this.path}/${name}`); },
   });
   function collection(collectionPath, filters = [], maximum = Infinity, order = null) {
@@ -243,6 +244,66 @@ test("livraison : réaffecter révoque l'ancien jeton et le livreur ne reçoit p
   const shared = await f.load("lib/actions/orders.ts").getSharedLocationViewAction(currentToken);
   assert.equal(shared.ok, true);
   assert.equal(shared.reviewToken, null);
+});
+
+test("livreur : une inscription publique reste inactive et inassignable jusqu'à validation admin", async () => {
+  const f = fixture({ "orders/delivery": { status: "prete", assignedCourierId: null } });
+  const actions = f.load("lib/actions/couriers.ts");
+
+  const registered = await actions.registerCourierAction({ name: "Jean Mboa", phone: "237 655 00 00 01" });
+  assert.equal(registered.ok, true);
+  assert.equal(f.state.adminChecks, 0);
+  const [courierPath, courier] = [...f.db.rows.entries()].find(([key]) => key.startsWith("couriers/"));
+  const courierId = courierPath.split("/")[1];
+  assert.equal(courier.active, false);
+  assert.equal(courier.pendingApproval, true);
+
+  // Tant que l'admin n'a rien validé : ni tableau de bord, ni livraison.
+  const dashboard = await actions.getCourierDashboardAction(registered.token);
+  assert.equal(dashboard.ok, false);
+  assert.match(dashboard.error, /en attente de validation/);
+  assert.equal((await actions.assignCourierToOrderAction("delivery", courierId)).ok, false);
+
+  assert.equal((await actions.setCourierActiveAction(courierId, true)).ok, true);
+  assert.equal(f.db.rows.get(courierPath).active, true);
+  assert.equal(f.db.rows.get(courierPath).pendingApproval, false);
+  assert.equal((await actions.getCourierDashboardAction(registered.token)).ok, true);
+  assert.equal((await actions.assignCourierToOrderAction("delivery", courierId)).ok, true);
+});
+
+test("livreur : l'inscription publique refuse les doublons et plafonne les demandes en attente", async () => {
+  const pending = Object.fromEntries(Array.from({ length: 19 }, (_, index) => [
+    `couriers/pending-${index}`, { name: `Faux ${index}`, phone: `2376000000${String(index).padStart(2, "0")}`, active: false, pendingApproval: true },
+  ]));
+  const f = fixture({ ...pending, "couriers/known": { name: "Connu", phone: "237655000002", token: "known-token", active: true } });
+  const actions = f.load("lib/actions/couriers.ts");
+  const countCouriers = () => [...f.db.rows.keys()].filter((key) => key.startsWith("couriers/")).length;
+
+  // Un numéro déjà enregistré ne crée rien et ne révèle jamais le lien existant.
+  const duplicate = await actions.registerCourierAction({ name: "Usurpateur", phone: "+237 655 000 002" });
+  assert.equal(duplicate.ok, false);
+  assert.equal("token" in duplicate, false);
+  assert.equal(countCouriers(), 20);
+
+  assert.equal((await actions.registerCourierAction({ name: "Vingtième", phone: "237655000003" })).ok, true);
+  const overflow = await actions.registerCourierAction({ name: "De trop", phone: "237655000004" });
+  assert.equal(overflow.ok, false);
+  assert.equal(countCouriers(), 21);
+  assert.equal((await actions.registerCourierAction({ name: "x".repeat(81), phone: "237655000005" })).ok, false);
+});
+
+test("livreur : seule une demande en attente peut être refusée, jamais un livreur validé", async () => {
+  const f = fixture({
+    "couriers/pending": { name: "Inconnu", phone: "237655000006", active: false, pendingApproval: true },
+    "couriers/validated": { name: "Validé", phone: "237655000007", active: true },
+  });
+  const actions = f.load("lib/actions/couriers.ts");
+
+  assert.equal((await actions.rejectCourierAction("validated")).ok, false);
+  assert.ok(f.db.rows.has("couriers/validated"));
+  assert.equal((await actions.rejectCourierAction("pending")).ok, true);
+  assert.equal(f.db.rows.has("couriers/pending"), false);
+  assert.equal(f.state.adminChecks, 2);
 });
 
 test("livraison : cinq codes erronés verrouillent temporairement la confirmation", async () => {

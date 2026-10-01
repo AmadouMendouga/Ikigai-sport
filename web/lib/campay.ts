@@ -5,12 +5,30 @@ import type { Order } from "@/lib/types";
 // Intégration CamPay (mobile money MTN/Orange) — addendum 3 du plan. Doc API
 // consultée directement sur leur Postman documenter (auth par jeton
 // permanent, /api/collect/, /api/transaction/(reference)/, webhook signé).
-const BASE_URL = process.env.CAMPAY_BASE_URL || "https://demo.campay.net";
+const DEMO_BASE_URL = "https://demo.campay.net";
 
-function authHeaders(): Record<string, string> {
+/** CamPay n'est pas configuré sur cet environnement — rien n'a été envoyé. */
+export class CampayConfigError extends Error {
+  constructor() {
+    super("Configuration CamPay absente en production (CAMPAY_BASE_URL et/ou CAMPAY_PERMANENT_ACCESS_TOKEN).");
+    this.name = "CampayConfigError";
+  }
+}
+
+// Lu à chaque appel, pas au chargement du module. En local et en preview, le
+// bac à sable CamPay reste le repli par défaut. En production, une variable
+// manquante ne doit JAMAIS envoyer un vrai client vers le bac à sable sans
+// que personne ne s'en aperçoive : on refuse avant tout appel réseau.
+function campayConfig(): { baseUrl: string; headers: Record<string, string> } {
+  const baseUrl = (process.env.CAMPAY_BASE_URL || "").trim().replace(/\/+$/, "");
+  const token = (process.env.CAMPAY_PERMANENT_ACCESS_TOKEN || "").trim();
+  if (process.env.VERCEL_ENV === "production" && (!baseUrl || !token)) {
+    console.error("[campay] Variables CAMPAY_BASE_URL / CAMPAY_PERMANENT_ACCESS_TOKEN absentes en production : paiement Mobile Money désactivé.");
+    throw new CampayConfigError();
+  }
   return {
-    Authorization: `Token ${process.env.CAMPAY_PERMANENT_ACCESS_TOKEN}`,
-    "Content-Type": "application/json",
+    baseUrl: baseUrl || DEMO_BASE_URL,
+    headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
   };
 }
 
@@ -58,11 +76,23 @@ function collectOutcomeForHttpStatus(status: number): CampayCollectOutcome {
 
 /** Déclenche un prompt de paiement Mobile Money sur le téléphone du client. */
 export async function campayCollect(input: CampayCollectInput): Promise<CampayCollectResult> {
+  let config;
+  try {
+    config = campayConfig();
+  } catch {
+    // Aucune requête n'est partie : c'est un refus certain, la réservation de
+    // stock peut être libérée et le client peut commander autrement.
+    throw new CampayCollectError(
+      "Le paiement Mobile Money est momentanément indisponible. Aucun débit n'a été effectué : commandez via WhatsApp ou réessayez plus tard.",
+      "rejected"
+    );
+  }
+
   let res: Response;
   try {
-    res = await fetch(`${BASE_URL}/api/collect/`, {
+    res = await fetch(`${config.baseUrl}/api/collect/`, {
       method: "POST",
-      headers: authHeaders(),
+      headers: config.headers,
       body: JSON.stringify({
         amount: String(input.amount),
         currency: "XAF",
@@ -127,7 +157,8 @@ export function campayTransactionMismatch(order: Order, transaction: CampayTrans
 
 /** Filet de secours si le webhook tarde — voir checkPaymentStatusAction. */
 export async function campayGetTransaction(reference: string): Promise<CampayTransactionStatus> {
-  const res = await fetch(`${BASE_URL}/api/transaction/${reference}/`, { headers: authHeaders() });
+  const config = campayConfig();
+  const res = await fetch(`${config.baseUrl}/api/transaction/${reference}/`, { headers: config.headers });
   if (!res.ok) {
     throw new Error(await readErrorMessage(res, "Impossible de vérifier le statut du paiement."));
   }
