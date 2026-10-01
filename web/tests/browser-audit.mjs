@@ -147,6 +147,27 @@ async function createAdminSessionCookie() {
   return adminAuth.createSessionCookie(idToken, { expiresIn: 60 * 60 * 1000 });
 }
 
+// Attend que le réseau se calme, sans en faire une condition d'échec. Une
+// vidéo diffusée en continu (reel du portail, fiche produit) garde sa requête
+// ouverte indéfiniment : exiger "networkidle" faisait planter l'audit dès
+// l'accueil au bout de 30 s. On attend donc "load", puis le calme réseau
+// pendant quelques secondes au plus.
+async function settle(page) {
+  await page.waitForLoadState("networkidle", { timeout: 6000 }).catch(() => {});
+}
+async function gotoSettled(page, url) {
+  const response = await page.goto(url, { waitUntil: "load" });
+  await settle(page);
+  return response;
+}
+
+// Vercel Analytics charge /_vercel/insights/script.js, qui n'existe que sur
+// Vercel : hors de Vercel ce script répond 404. Ce bruit ne signale pas une
+// erreur du site, on l'écarte du contrôle des erreurs console.
+function isVercelInsightsNoise(message) {
+  return `${message.text()} ${message.location()?.url || ""}`.includes("/_vercel/insights/");
+}
+
 const port = await getFreePort();
 const base = `http://127.0.0.1:${port}/`;
 console.log(`Démarrage de next start sur ${base}...`);
@@ -169,14 +190,14 @@ try {
     const page = await context.newPage();
     const errors = [];
     const external = [];
-    page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+    page.on("console", (m) => m.type() === "error" && !isVercelInsightsNoise(m) && errors.push(m.text()));
     page.on("pageerror", (e) => errors.push(e.message));
     page.on("request", (r) => {
       const url = new URL(r.url());
       if (url.protocol !== "data:" && !ALLOWED_HOSTS.some((re) => re.test(url.hostname))) external.push(url.href);
     });
 
-    const response = await page.goto(`${base}${route}`, { waitUntil: "networkidle" });
+    const response = await gotoSettled(page, `${base}${route}`);
     check(response?.status() === 200, `/${route} ne répond pas en 200`);
     check(errors.length === 0, `/${route} produit des erreurs : ${errors.join(" | ")}`);
     check(external.length === 0, `/${route} charge des ressources hors liste blanche : ${external.join(", ")}`);
@@ -261,7 +282,7 @@ try {
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.goto(`${base}${route}`, { waitUntil: "networkidle" });
+    await gotoSettled(page, `${base}${route}`);
     check(errors.length === 0, `/${route} produit des erreurs en desktop : ${errors.join(" | ")}`);
     check(
       await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
@@ -292,7 +313,7 @@ try {
   {
     const context = await browser.newContext();
     const page = await context.newPage();
-    await page.goto(`${base}football/produits/maillot-domicile-psg`, { waitUntil: "networkidle" });
+    await gotoSettled(page, `${base}football/produits/maillot-domicile-psg`);
     const realPriceText = await page.locator(".price-now").first().textContent();
     const realPrice = Number((realPriceText || "").replace(/\D/g, ""));
     check(realPrice > 0, "impossible de lire le prix réel du produit de test (maillot-domicile-psg)");
@@ -311,7 +332,8 @@ try {
 
     const cartErrors = [];
     page.on("pageerror", (e) => cartErrors.push(e.message));
-    await page.reload({ waitUntil: "networkidle" });
+    await page.reload({ waitUntil: "load" });
+    await settle(page);
     check(cartErrors.length === 0, "un panier altéré fait planter la fiche produit");
 
     await page.locator(".cart-bar").click();
@@ -346,7 +368,7 @@ try {
     await page.addInitScript(() => localStorage.setItem("lmi_cart_v3", "{"));
     const corruptErrors = [];
     page.on("pageerror", (e) => corruptErrors.push(e.message));
-    await page.goto(`${base}football/boutique`, { waitUntil: "networkidle" });
+    await gotoSettled(page, `${base}football/boutique`);
     check(corruptErrors.length === 0, "un panier JSON invalide fait planter la boutique");
     check((await page.locator(".product-card").count()) > 0, "le catalogue ne se rend pas après réparation du panier");
     check(
@@ -361,7 +383,7 @@ try {
   {
     const context = await browser.newContext();
     const page = await context.newPage();
-    await page.goto(`${base}admin`, { waitUntil: "networkidle" });
+    await gotoSettled(page, `${base}admin`);
     check(new URL(page.url()).pathname === "/admin/connexion", "un visiteur non connecté peut accéder à /admin");
     await context.close();
   }

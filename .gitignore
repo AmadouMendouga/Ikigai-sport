@@ -10,3 +10,8 @@ images-le-maillot-ideal.zip
 
 .vercel
 .env*
+
+# Photos sources des maillots (PNG bruts, plus de 140 fichiers) : gardées en
+# local, jamais versionnées ici.
+/Maillot Nanabros/
+/Maillot tlq/
