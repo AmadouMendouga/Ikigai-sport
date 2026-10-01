@@ -27,7 +27,7 @@
     "jsqr": "^1.4.0",
     "leaflet": "^1.9.4",
     "maplibre-gl": "6.9.0",
-    "next": "16.3.3",
+    "next": "16.3.8",
     "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -41,7 +41,7 @@
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
     "eslint": "^9",
-    "eslint-config-next": "16.3.3",
+    "eslint-config-next": "16.3.8",
     "firebase-tools": "^15.28.2",
     "playwright": "1.62.1",
     "typescript": "^5"
