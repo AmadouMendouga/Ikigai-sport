@@ -1943,6 +1943,20 @@ html[data-theme="dark"] .mborder-highlight { background: radial-gradient(var(--p
   .dlv-marker .ring { animation: none; opacity: .25; transform: scale(.75); }
 }
 
+/* Tracé de l'itinéraire : se dessine du livreur vers le client à sa première
+   apparition. La classe is-drawing est posée puis retirée par DeliveryMap
+   (playRouteDraw), qui met aussi pathLength="1" sur le <path> : la longueur
+   devient relative, 1 = tout le tracé quel que soit le zoom. Hors animation,
+   aucun pointillé ne s'applique et le trait reste plein. */
+.dlv-route-path.is-drawing { animation: dlv-route-draw .9s cubic-bezier(.4, 0, .2, 1) both; }
+@keyframes dlv-route-draw {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to { stroke-dasharray: 1; stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dlv-route-path.is-drawing { animation: none; }
+}
+
 /* ---------- Suivi de livraison plein écran (/livraison/[token]) ---------- */
 /* La carte doit rester visible en permanence pendant l'usage (retour client
    du 06/09/2026, patron VTC/livraison type Bolt/Gozem) — plus question

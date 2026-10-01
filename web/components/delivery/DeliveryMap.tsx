@@ -83,6 +83,34 @@ async function fetchRoute(from: { lat: number; lng: number }, to: { lat: number;
   }
 }
 
+// Fait « se dessiner » l'itinéraire du livreur vers le client. Leaflet rend
+// chaque polyligne en <path> SVG : pathLength="1" rend sa longueur relative
+// (1 = tout le tracé, quel que soit le zoom), et la classe is-drawing lance
+// l'animation CSS dlv-route-draw (app/lmi.css). Elle est retirée en fin
+// d'animation pour que le trait redevienne un trait plein ordinaire. Purement
+// décoratif : ne déplace ni marqueur ni caméra, la position affichée reste
+// celle du GPS.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- polylignes Leaflet réelles, importées dynamiquement
+function playRouteDraw(layers: any[]) {
+  // Page en arrière-plan (écran verrouillé, autre onglet) : le navigateur gèle
+  // les animations à leur première image, le tracé resterait invisible jusqu'au
+  // retour. On l'affiche donc directement, sans effet.
+  if (document.hidden) return;
+  for (const layer of layers) {
+    const path = layer?.getElement?.() as SVGPathElement | undefined;
+    if (!path) continue;
+    const done = () => path.classList.remove("is-drawing");
+    path.setAttribute("pathLength", "1");
+    done();
+    void path.getBoundingClientRect(); // force le redémarrage si la classe était déjà là
+    path.classList.add("is-drawing");
+    path.addEventListener("animationend", done, { once: true });
+    // Filet de sécurité : quoi qu'il arrive à l'animation, le trait redevient
+    // plein. Un itinéraire qui ne s'affiche pas serait pire que pas d'effet.
+    setTimeout(done, 1500);
+  }
+}
+
 export function DeliveryMap({
   customer,
   courier,
@@ -142,6 +170,9 @@ export function DeliveryMap({
   const routeRequestRef = useRef(0);
   const routeAbortRef = useRef<AbortController | null>(null);
   const routeResolvedRef = useRef(false);
+  // Vrai tant qu'un itinéraire est affiché : l'effet de tracé ne joue qu'à son
+  // apparition, pas à chaque recalcul (toutes les 30 s pendant la course).
+  const routeShownRef = useRef(false);
   const viewportRef = useRef<Array<{ lat: number; lng: number }>>([]);
   // Évite de rappeler OSRM à chaque sondage (toutes les 6s) si personne n'a
   // vraiment bougé — voir le throttle plus bas.
@@ -192,12 +223,13 @@ export function DeliveryMap({
       };
       // Itinéraire routier vert avec un halo contrasté. Les historiques
       // restent réservés à l'administration.
-      routeHaloRef.current = L.polyline([], { color: darkMap || isDarkTheme() ? "#092715" : "#ffffff", weight: 11, opacity: .9, lineCap: "round" }).addTo(map);
+      routeHaloRef.current = L.polyline([], { color: darkMap || isDarkTheme() ? "#092715" : "#ffffff", weight: 11, opacity: .9, lineCap: "round", className: "dlv-route-path" }).addTo(map);
       routeLineRef.current = L.polyline([], {
         color: "#22C55E",
         weight: navigationMode ? 6 : 5,
         opacity: 0.95,
         lineCap: "round",
+        className: "dlv-route-path",
       }).addTo(map);
       map.invalidateSize();
       setMapReady(true);
@@ -242,6 +274,7 @@ export function DeliveryMap({
         routeLineRef.current = null;
         routeHaloRef.current = null;
         routeStateRef.current = null;
+        routeShownRef.current = false;
         viewportRef.current = [];
       }
     };
@@ -351,12 +384,15 @@ export function DeliveryMap({
             setRoute(null);
             routeHaloRef.current?.setLatLngs([]);
             routeLineRef.current?.setLatLngs([]);
+            routeShownRef.current = false;
             return;
           }
           setRouteStatus("ready");
           setRoute(result);
           routeHaloRef.current?.setLatLngs(result.coords);
           routeLineRef.current?.setLatLngs(result.coords);
+          if (!routeShownRef.current) playRouteDraw([routeHaloRef.current, routeLineRef.current]);
+          routeShownRef.current = true;
           setRouteStats({
             distanceKm: result.distanceMeters / 1000,
             minutes: Math.round(result.durationSeconds / 60),
@@ -371,6 +407,7 @@ export function DeliveryMap({
       setRoute(null);
       routeHaloRef.current?.setLatLngs([]);
       routeLineRef.current?.setLatLngs([]);
+      routeShownRef.current = false;
       routeRequestRef.current += 1;
       routeAbortRef.current?.abort();
       routeResolvedRef.current = false;
