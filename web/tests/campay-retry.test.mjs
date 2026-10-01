@@ -92,6 +92,60 @@ test("CamPay : une réponse 200 incomplète reste incertaine", async () => {
   });
 });
 
+async function withEnv(values, callback) {
+  const previous = Object.fromEntries(Object.keys(values).map((key) => [key, process.env[key]]));
+  for (const [key, value] of Object.entries(values)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+  try {
+    return await callback();
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
+
+test("CamPay : en production sans configuration, aucun appel ne part vers le bac à sable", async () => {
+  const campay = loadCampay();
+  const calls = [];
+  const originalError = console.error;
+  console.error = () => {};
+  try {
+    await withEnv({ VERCEL_ENV: "production", CAMPAY_BASE_URL: undefined, CAMPAY_PERMANENT_ACCESS_TOKEN: undefined }, () =>
+      withFetch(async (url) => { calls.push(String(url)); return new Response("{}", { status: 200 }); }, async () => {
+        // Refus certain (rien n'a été envoyé) : le stock peut être libéré.
+        await assert.rejects(
+          () => campay.campayCollect(input),
+          (error) => error instanceof campay.CampayCollectError && error.outcome === "rejected"
+        );
+        await assert.rejects(() => campay.campayGetTransaction("provider-test"), campay.CampayConfigError);
+      })
+    );
+  } finally {
+    console.error = originalError;
+  }
+  assert.deepEqual(calls, []);
+});
+
+test("CamPay : la production utilise l'adresse configurée, le hors-production garde le bac à sable", async () => {
+  const campay = loadCampay();
+  const calls = [];
+  const complete = async (url) => {
+    calls.push(String(url));
+    return new Response(JSON.stringify({ reference: "provider-test", ussd_code: "*126#", operator: "MTN" }), { status: 200 });
+  };
+  await withEnv({ VERCEL_ENV: "production", CAMPAY_BASE_URL: "https://paiement.test.invalid/", CAMPAY_PERMANENT_ACCESS_TOKEN: "jeton-de-test" }, () =>
+    withFetch(complete, () => campay.campayCollect(input))
+  );
+  await withEnv({ VERCEL_ENV: "preview", CAMPAY_BASE_URL: undefined, CAMPAY_PERMANENT_ACCESS_TOKEN: undefined }, () =>
+    withFetch(complete, () => campay.campayCollect(input))
+  );
+  assert.deepEqual(calls, ["https://paiement.test.invalid/api/collect/", "https://demo.campay.net/api/collect/"]);
+});
+
 test("CamPay : une réponse complète est acceptée", async () => {
   const campay = loadCampay();
   await withFetch(async () => new Response(JSON.stringify({

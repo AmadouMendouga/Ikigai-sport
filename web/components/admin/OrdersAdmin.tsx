@@ -18,7 +18,7 @@ import {
   setCourierPayoutAction,
   type LocationPoint,
 } from "@/lib/actions/orders";
-import { assignCourierToOrderAction, setCourierActiveAction } from "@/lib/actions/couriers";
+import { assignCourierToOrderAction, rejectCourierAction, setCourierActiveAction } from "@/lib/actions/couriers";
 import type { Courier, Order, OrderItem, Product, SiteSettings } from "@/lib/types";
 import type { DeliveryIncidentType, OrderStatus } from "@/lib/types";
 import { canGenerateTrackingLink, normalizeOrderStatus, ORDER_STATUS_LABELS, ORDER_STATUS_OPTIONS } from "@/lib/orderWorkflow";
@@ -829,15 +829,32 @@ function CouriersDrawer({
   couriers,
   siteUrl,
   onToggle,
+  onReject,
 }: {
   open: boolean;
   onClose: () => void;
   couriers: Courier[];
   siteUrl: string;
   onToggle: (id: string, active: boolean) => void;
+  onReject: (id: string) => void;
 }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const registerUrl = `${siteUrl.replace(/\/$/, "")}/livreur/inscription`;
+
+  async function reject(courier: Courier) {
+    if (!confirm(`Refuser la demande de « ${courier.name} » ? Elle sera supprimée.`)) return;
+    setBusyId(courier.id);
+    try {
+      const result = await rejectCourierAction(courier.id);
+      if (!result.ok) {
+        alert(result.error);
+        return;
+      }
+      onReject(courier.id);
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function toggle(courier: Courier) {
     setBusyId(courier.id);
@@ -865,8 +882,8 @@ function CouriersDrawer({
   return (
     <Drawer open={open} onClose={onClose} title="Livreurs enregistrés" titleIcon="shipping">
       <p className="sub" style={{ marginBottom: 14 }}>
-        Un livreur s&apos;enregistre lui-même via ce lien, puis apparaît ci-dessous et dans la liste d&apos;assignation
-        de chaque commande.
+        Un livreur s&apos;enregistre lui-même via ce lien et apparaît ci-dessous « à valider ». Il ne peut recevoir de
+        livraison qu&apos;une fois sa demande validée ici.
       </p>
       <button type="button" className="btn btn-tonal btn-block" style={{ marginBottom: 20 }} onClick={copyRegisterLink}>
         <Icon name="publish" size="sm" />
@@ -896,10 +913,18 @@ function CouriersDrawer({
               <div>
                 <div className="name">{c.name}</div>
                 <div className="sub">{c.phone}</div>
+                {c.pendingApproval ? <span className="badge badge-stock-low">À valider</span> : null}
               </div>
-              <button type="button" className="btn btn-tonal btn-sm" disabled={busyId === c.id} onClick={() => toggle(c)}>
-                {c.active ? "Désactiver" : "Réactiver"}
-              </button>
+              <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                {c.pendingApproval ? (
+                  <button type="button" className="btn btn-tonal btn-sm" disabled={busyId === c.id} onClick={() => reject(c)}>
+                    Refuser
+                  </button>
+                ) : null}
+                <button type="button" className={c.pendingApproval ? "btn btn-primary btn-sm" : "btn btn-tonal btn-sm"} disabled={busyId === c.id} onClick={() => toggle(c)}>
+                  {c.pendingApproval ? "Valider" : c.active ? "Désactiver" : "Réactiver"}
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -931,6 +956,7 @@ export function OrdersAdmin({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [couriersOpen, setCouriersOpen] = useState(false);
   const [couriers, setCouriers] = useState(initialCouriers);
+  const pendingCouriers = couriers.filter((c) => c.pendingApproval).length;
   const [formNonce, setFormNonce] = useState(0);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -1018,6 +1044,7 @@ export function OrdersAdmin({
         <button type="button" className="btn btn-tonal btn-sm" onClick={() => setCouriersOpen(true)}>
           <Icon name="shipping" size="sm" />
           Livreurs ({couriers.filter((c) => c.active).length})
+          {pendingCouriers > 0 ? <span className="badge badge-stock-low">{pendingCouriers} à valider</span> : null}
         </button>
         <label className="field-wrap grow"><Icon name="search" /><input className="search-input" type="search" aria-label="Rechercher une commande" placeholder="Client, téléphone, article…" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
         <select className="sort-select" aria-label="Filtrer les commandes" value={view} onChange={(event) => setView(event.target.value)}>
@@ -1132,7 +1159,8 @@ export function OrdersAdmin({
         onClose={() => setCouriersOpen(false)}
         couriers={couriers}
         siteUrl={settings.siteUrl}
-        onToggle={(id, active) => setCouriers((list) => list.map((c) => (c.id === id ? { ...c, active } : c)))}
+        onToggle={(id, active) => setCouriers((list) => list.map((c) => (c.id === id ? { ...c, active, pendingApproval: active ? false : c.pendingApproval } : c)))}
+        onReject={(id) => setCouriers((list) => list.filter((c) => c.id !== id))}
       />
     </section></OrderUpdates.Provider>
   );
