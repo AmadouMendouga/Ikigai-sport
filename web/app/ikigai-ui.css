@@ -127,7 +127,7 @@ html[data-theme="dark"] .ik-app {
 .ik-bottom-nav { display: none; }
 
 /* A white checkout panel; price and next action carry the emphasis. */
-.ik-app .cart-panel { color: var(--on-surface); background: var(--surface); border: 1px solid var(--outline-variant); box-shadow: 0 12px 36px rgb(20 39 28 / 14%); max-height: 85dvh; overflow-y: auto; }
+.ik-app .cart-panel { color: var(--on-surface); background: var(--surface); border: 1px solid var(--outline-variant); box-shadow: 0 12px 36px rgb(20 39 28 / 14%); max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain; }
 .ik-app .cart-panel-head { padding: 18px; }
 .ik-app .cart-panel-head .close, .ik-app .cart-panel-head .count-chip { background: var(--surface-container); color: var(--on-surface); }
 .ik-app .cart-panel-head .close { width: 44px; height: 44px; }

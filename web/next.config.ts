@@ -22,11 +22,27 @@ const securityHeaders = [
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "Permissions-Policy", value: "camera=(self), geolocation=(self), microphone=(), payment=(), usb=()" },
   { key: "Content-Security-Policy", value: "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" },
+  // Force les navigateurs à n'accéder au site qu'en HTTPS pendant 2 ans, y
+  // compris pour les sous-domaines. Vercel active HTTPS mais n'injecte pas cet
+  // en-tête lui-même : sans lui un premier accès HTTP reste possible.
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
 ];
 
 const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
+  },
+  // Domaines autorisés pour le composant <Image> de Next.js.
+  // Sans cette liste, toute URL externe passée à <Image src="…"> provoque une
+  // erreur de domaine non autorisé — c'est pourquoi certains composants
+  // utilisaient encore <img> natif pour les photos Cloudinary.
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+    ],
   },
   // N'annonce pas la technologie utilisée (en-tête X-Powered-By).
   poweredByHeader: false,
