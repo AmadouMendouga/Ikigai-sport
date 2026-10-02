@@ -4,6 +4,7 @@
 // Chaque vignette réutilise Direction Aware Hover ; la visionneuse gère
 // flèches clavier, Échap, clic sur le fond, boutons précédent/suivant.
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Icon } from "@/components/icons/Icon";
 import { useDirectionAwareHover } from "@/hooks/useDirectionAwareHover";
 import type { GalleryItem } from "@/lib/types";
@@ -13,8 +14,14 @@ function PhotoGridItem({ item, index, onOpen }: { item: GalleryItem; index: numb
   return (
     <button className="photo-item dah" aria-label={`Agrandir la photo ${index + 1}`} onClick={() => onOpen(index)} {...dah}>
       <span className="dah-img">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.thumb} alt={`Photo ${index + 1}`} loading="lazy" />
+        <Image
+          src={item.thumb}
+          alt={`Photo ${index + 1}`}
+          width={400}
+          height={400}
+          sizes="(max-width: 560px) 50vw, (max-width: 940px) 33vw, 25vw"
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
       </span>
       <span className="dah-overlay" />
       <span className="dah-caption">

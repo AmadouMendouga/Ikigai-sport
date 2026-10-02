@@ -594,6 +594,13 @@ body:has(.ik-app.dlv-screen) .toast { top: calc(84px + env(safe-area-inset-top))
 .ik-profile-logout { display: flex; gap: 12px; justify-content: center; align-items: center; width: 100%; min-height: 52px; border-radius: 100px; background: var(--surface); border: 1px solid var(--outline-variant); color: var(--on-surface); cursor: pointer; font-size: .9rem; }
 .ik-profile-signature { text-align: center; font-size: .72rem; color: var(--on-surface-variant); margin-top: 24px; }
 .ik-loading-card { height: 120px; margin-bottom: 18px; opacity: .65; }
+/* Squelettes de chargement — boutique et fiche produit */
+.ik-skel { background: var(--surface-container-high); border-radius: 8px; animation: ik-skel-pulse 1.6s ease-in-out infinite; }
+@keyframes ik-skel-pulse { 0%, 100% { opacity: .45; } 50% { opacity: .85; } }
+.ik-skel-card { border-radius: var(--r-card); overflow: hidden; background: var(--surface); border: 1px solid var(--outline-variant); }
+.ik-skel-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.ik-skel-pd { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; padding: 24px 0; }
+@media (max-width: 780px) { .ik-skel-pd { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
   .ik-orders-page, .ik-order-page, .ik-profile-page { padding-top: 24px; }
   .ik-order-detail-grid { grid-template-columns: 1fr; }

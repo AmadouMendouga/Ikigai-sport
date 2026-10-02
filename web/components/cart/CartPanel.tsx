@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { Icon } from "@/components/icons/Icon";
@@ -201,8 +202,7 @@ export function CartPanel({ settings }: { settings: SiteSettings }) {
         ) : (
           details.map((item, idx) => (
             <div className="cp-item" key={item.slug + item.size}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.product.images.square} alt="" />
+              <Image src={item.product.images.square} alt="" width={48} height={48} />
               <div className="cp-info">
                 <div className="cp-cat">
                   {item.product.leagueLabel || "Maillot"} · {item.size}

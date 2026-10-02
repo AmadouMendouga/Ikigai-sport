@@ -7,6 +7,7 @@
 // pause au survol/focus/hors-écran/clic sur pause. Masque toute la section
 // si `testimonials` est vide (voir usage dans la page).
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Icon } from "@/components/icons/Icon";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { Testimonial } from "@/lib/types";
@@ -219,8 +220,7 @@ export function AnimatedTestimonials({
                 restart();
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.photoUrl} alt={item.name} draggable={false} />
+              <Image src={item.photoUrl} alt={item.name} fill sizes="(max-width: 768px) 85vw, 400px" />
             </div>
           ))}
         </div>

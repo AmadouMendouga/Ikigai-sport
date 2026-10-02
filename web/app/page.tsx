@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getAllSports } from "@/lib/data/sports";
 import { getAllProducts } from "@/lib/data/products";
 import { getSiteSettings } from "@/lib/data/settings";
@@ -199,12 +200,26 @@ export default async function PortalPage() {
           <div className="container">
             <div className="about-grid">
               <div className="portal-about-media">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="main" src={aboutMainImage} alt="" loading="lazy" />
+                {aboutMainImage && (
+                  <Image
+                    className="main"
+                    src={aboutMainImage}
+                    alt=""
+                    width={400}
+                    height={500}
+                    sizes="(max-width: 880px) 100vw, 40vw"
+                  />
+                )}
                 {aboutAccentImage && (
                   <div className="accent">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={aboutAccentImage} alt="" loading="lazy" />
+                    <Image
+                      src={aboutAccentImage}
+                      alt=""
+                      width={300}
+                      height={300}
+                      sizes="20vw"
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
                   </div>
                 )}
               </div>

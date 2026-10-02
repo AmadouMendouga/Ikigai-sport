@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { Icon } from "@/components/icons/Icon";
 import { useCart } from "@/components/cart/CartContext";
 
@@ -55,8 +56,7 @@ export function CartBar() {
     >
       <span className="cart-bar-thumbs">
         {thumbs.map((item, i) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={item.slug + item.size + i} src={item.product.images.square} alt="" />
+          <Image key={item.slug + item.size + i} src={item.product.images.square} alt="" width={30} height={30} />
         ))}
         {extra > 0 && <span className="more">+{extra}</span>}
       </span>
