@@ -48,6 +48,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Compteurs de tentatives de connexion (rate limiting sur /api/session).
+    // Accessible uniquement via l'Admin SDK (jamais par le client) — le catch-all
+    // ci-dessous suffirait, mais être explicite évite toute ambiguïté.
+    match /rateLimits/{docId} {
+      allow read, write: if false;
+    }
+
     // Tout le reste (futures collections users en Phase 2/3) : fermé par
     // défaut tant que la logique n'est pas explicitement écrite ici.
     match /{document=**} {
