@@ -148,7 +148,7 @@ html[data-theme="dark"] .ik-app {
    photo confinée à un coin" jugé trop vide sur un vrai téléphone). La photo
    reste discrète (opacité basse) et un filtre de couleur (.portal-hero-scrim,
    déjà prévu par le patron de base pour la lisibilité du texte) domine par-dessus. */
-.ik-portal { padding-top: 128px; }
+.ik-portal { padding-top: 0; }
 .ik-portal .portal-topbar, .ik-portal .portal-header { color: var(--on-surface); background: var(--surface); }
 .ik-portal .portal-topbar { border-color: var(--outline-variant); }
 .ik-portal .portal-header::before { display: none; }
