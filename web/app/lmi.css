@@ -2310,11 +2310,9 @@ body.portal-drawer-open { overflow: hidden; }
   position: absolute; inset: 0; z-index: -1; overflow: hidden;
   transform: scale(1.12); pointer-events: none; user-select: none;
 }
-/* object-position décalé à droite : le texte (.portal-hero-content) est
-   toujours aligné à gauche, un cadrage centré par défaut place trop souvent
-   le sujet principal de la photo (visage, etc.) exactement derrière le texte
-   (retour client du 06/09/2026). */
-.portal-hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 75% 30%; display: block; }
+/* object-position : sujet principal décalé vers la droite pour éviter qu'il
+   tombe exactement au centre où vit le texte (retour client 06/09/2026). */
+.portal-hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 70% 30%; display: block; }
 .portal-hero-slide.active .portal-hero-bg { animation: portalHeroZoom 7s linear forwards; }
 @keyframes portalHeroZoom {
   0% { transform: scale(1); }
@@ -2322,15 +2320,13 @@ body.portal-drawer-open { overflow: hidden; }
 }
 /* voile coloré (teinte du sport) au-dessus de la photo, pour la lisibilité du texte */
 .portal-hero-scrim { position: absolute; inset: 0; opacity: .84; }
-/* voile SUPPLÉMENTAIRE, statique (pas de couleur dynamique) : assombrit
-   spécifiquement la zone gauche où vit le texte — le voile diagonal ci-dessus
-   y place justement la teinte claire du sport plutôt que le fond sombre.
-   Corrige, de facto, les photos dont le sujet tombe derrière le texte. */
+/* voile SUPPLÉMENTAIRE, statique : assombrit le bas du hero où vit le texte
+   centré — améliore la lisibilité quelle que soit la couleur locale de la photo. */
 .portal-hero-scrim::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.12) 55%, transparent 85%);
+  background: linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.52) 65%, rgba(0,0,0,.35) 100%);
 }
-.portal-hero-content { max-width: 640px; }
+.portal-hero-content { max-width: 640px; text-align: center; }
 /* Le voile (.portal-hero-scrim) ne garantit qu'un contraste MOYEN correct :
    une photo a des zones claires locales qui peuvent rester sous 4.5:1 même
    scrim appliqué. L'ombre portée assure la lisibilité quel que soit le pixel
@@ -2345,7 +2341,8 @@ body.portal-drawer-open { overflow: hidden; }
   box-shadow: 0 8px 24px rgba(0,0,0,.35);
 }
 .portal-hero-content h1, .portal-hero-content h2 { font-size: clamp(1.9rem, 4vw, 2.9rem); letter-spacing: -1.2px; text-transform: uppercase; margin-bottom: .3em; }
-.portal-hero-content p { font-size: 1rem; opacity: .92; font-weight: 500; max-width: 46ch; margin-bottom: 26px; }
+.portal-hero-content p { font-size: 1rem; opacity: .92; font-weight: 500; max-width: 46ch; margin: 0 auto 26px; }
+.portal-hero-content .hero-ctas { justify-content: center; }
 .portal-hero-reveal { transform: translateY(30px); opacity: 0; }
 .portal-hero-slide.active .portal-hero-reveal { animation: portalHeroReveal 1s ease forwards; }
 .portal-hero-slide.active .hero-badge { animation-delay: .3s; }
